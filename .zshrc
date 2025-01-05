@@ -122,5 +122,7 @@ zstyle ':omz:plugins:alias-finder' cheaper yes # disabled by default
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias v=nvim
 
+# To install p10k, run:
+#   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 # To customize prompt, run `p10k configure` or edit ~/dotfiles/.p10k.zsh.
 [[ ! -f ~/dotfiles/.p10k.zsh ]] || source ~/dotfiles/.p10k.zsh
