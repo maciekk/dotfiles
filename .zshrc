@@ -12,7 +12,8 @@ export ZSH="$HOME/.oh-my-zsh"
 #ZSH_THEME="minimal"
 #ZSH_THEME="lambda"
 #ZSH_THEME="half-life"
-ZSH_THEME="sorin"
+#ZSH_THEME="sorin"
+ZSH_THEME="minimal_improved"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -74,7 +75,7 @@ HIST_STAMPS="yyyy-mm-dd"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git colored-man-pages colorize)
+plugins=(git colored-man-pages colorize zsh-syntax-highlighting zsh-autosuggestions)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -106,3 +107,4 @@ eval "$(fzf --zsh)"
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+alias v=nvim
