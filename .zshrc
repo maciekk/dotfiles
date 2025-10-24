@@ -82,8 +82,7 @@ HIST_STAMPS="yyyy-mm-dd"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-#plugins=(aliases alias-finder common-aliases colorize colored-man-pages git)
-plugins=(aliases common-aliases colorize colored-man-pages git)
+plugins=(aliases common-aliases git colored-man-pages colorize zsh-syntax-highlighting zsh-autosuggestions)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -121,10 +120,13 @@ zstyle ':omz:plugins:alias-finder' cheaper yes # disabled by default
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias v='nvim'
+alias v=nvim
 
+# To install p10k, run:
+#   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 # To customize prompt, run `p10k configure` or edit ~/dotfiles/.p10k.zsh.
 [[ ! -f ~/dotfiles/.p10k.zsh ]] || source ~/dotfiles/.p10k.zsh
 
 # Zoxide install
+#   https://github.com/ajeetdsouza/zoxide
 eval "$(zoxide init zsh)"
