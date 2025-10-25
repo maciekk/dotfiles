@@ -107,10 +107,10 @@ eval "$(fzf --zsh)"
 # export ARCHFLAGS="-arch x86_64"
 
 # Tweak alias-finder
-zstyle ':omz:plugins:alias-finder' autoload yes # disabled by default
-zstyle ':omz:plugins:alias-finder' longer yes # disabled by default
-zstyle ':omz:plugins:alias-finder' exact yes # disabled by default
-zstyle ':omz:plugins:alias-finder' cheaper yes # disabled by default
+#zstyle ':omz:plugins:alias-finder' autoload yes # disabled by default
+#zstyle ':omz:plugins:alias-finder' longer yes # disabled by default
+#zstyle ':omz:plugins:alias-finder' exact yes # disabled by default
+#zstyle ':omz:plugins:alias-finder' cheaper yes # disabled by default
 
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
