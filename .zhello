@@ -16,23 +16,35 @@ elif (( _hr >= 17 && _hr < 21 )); then _greet="Good evening"
 else _greet="Hey"
 fi
 
-# ── memory (macOS) ──────────────────────────────────────────────────────────
-_page=$(sysctl -n hw.pagesize)
-_mtot=$(( $(sysctl -n hw.memsize) / 1073741824 ))
-_mused=$(vm_stat | awk -v ps="$_page" '
-  /Pages active:/     { val=$NF; gsub(/[^0-9]/,"",val); a=val }
-  /Pages wired down:/ { val=$NF; gsub(/[^0-9]/,"",val); w=val }
-  END { printf "%.1f", (a+w)*ps/1073741824 }
-')
+# ── memory ──────────────────────────────────────────────────────────────────
+if [[ "$(uname)" == "Darwin" ]]; then
+  _page=$(sysctl -n hw.pagesize)
+  _mtot=$(( $(sysctl -n hw.memsize) / 1073741824 ))
+  _mused=$(vm_stat | awk -v ps="$_page" '
+    /Pages active:/     { val=$NF; gsub(/[^0-9]/,"",val); a=val }
+    /Pages wired down:/ { val=$NF; gsub(/[^0-9]/,"",val); w=val }
+    END { printf "%.1f", (a+w)*ps/1073741824 }
+  ')
+else
+  _mtot=$(awk '/MemTotal/  { printf "%.0f", $2/1048576 }' /proc/meminfo)
+  _mused=$(awk '/MemTotal/ { t=$2 } /MemAvailable/ { a=$2 } END { printf "%.1f", (t-a)/1048576 }' /proc/meminfo)
+fi
 
 # ── last login ──────────────────────────────────────────────────────────────
 _lastlogin=$(last $USER | awk 'NR==2{print $3, $4, $5, $6}')
 
 # ── other info ──────────────────────────────────────────────────────────────
 _host=$(hostname -s)
-_os=$(sw_vers -productVersion)
+if [[ "$(uname)" == "Darwin" ]]; then
+  _os=$(sw_vers -productVersion)
+  _load=$(sysctl -n vm.loadavg | awk '{print $2}')
+  _os_label="macOS"
+else
+  _os=$(grep -oP '(?<=^PRETTY_NAME=").*(?=")' /etc/os-release 2>/dev/null || uname -r)
+  _load=$(awk '{print $1}' /proc/loadavg)
+  _os_label="linux"
+fi
 _up=$(uptime | sed -E 's/.*up ([^,]+),.*/\1/' | xargs)
-_load=$(sysctl -n vm.loadavg | awk '{print $2}')
 _disk=$(df -h / | awk 'NR==2{print $4 " free / " $2}')
 
 # ── fortune ─────────────────────────────────────────────────────────────────
@@ -43,7 +55,7 @@ echo ""
 printf "  ${_b}${_c}${_greet}, ${USER}!${_r}  ${_d}$(date '+%a %d %b  ·  %H:%M')${_r}\n"
 printf "     ${_d}last login  ${_lastlogin}${_r}\n"
 printf "  ${_d}────────────────────────────────────────────────────────${_r}\n"
-printf "  ${_d}host${_r}  %-24s${_d}macOS${_r}  %s\n"  "$_host"  "$_os"
+printf "  ${_d}host${_r}  %-24s${_d}${_os_label}${_r}  %s\n"  "$_host"  "$_os"
 printf "  ${_d}up${_r}    %-24s${_d}load${_r}   %s\n"  "$_up"    "$_load"
 printf "  ${_d}mem${_r}   %-24s${_d}disk${_r}   %s\n"  "${_mused}G / ${_mtot}G"  "$_disk"
 if [[ -n "$_fortune" ]]; then
