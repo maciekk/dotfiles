@@ -88,6 +88,11 @@ MAILCHECK=0
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(aliases common-aliases git colored-man-pages colorize)
 
+# Reroute the completion dump files.
+# Source:
+#   https://stackoverflow.com/questions/62931101/i-have-multiple-files-of-zcompdump-why-do-i-have-multiple-files-of-these
+export ZSH_COMPDUMP=$ZSH/cache/.zcompdump-$HOST
+
 source $ZSH/oh-my-zsh.sh
 
 # Add fzf integration, as per install hints:
@@ -153,3 +158,6 @@ eval "$(zoxide init zsh)"
 # Load local env variables
 [ -f "$HOME/.env" ] && export $(grep -v '^#' "$HOME/.env" | xargs)
 
+# try setup
+eval "$(/usr/bin/try init ~/src/tries)"
+export PATH="$HOME/.local/bin:$PATH"
