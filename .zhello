@@ -1,0 +1,55 @@
+#!/bin/zsh
+
+# ── colors ──────────────────────────────────────────────────────────────────
+_r=$'\033[0m'    # reset
+_b=$'\033[1m'    # bold
+_d=$'\033[2m'    # dim
+_c=$'\033[36m'   # cyan
+_g=$'\033[32m'   # green
+_y=$'\033[33m'   # yellow
+
+# ── greeting ────────────────────────────────────────────────────────────────
+_hr=$(date +%H)
+if   (( _hr >= 5  && _hr < 12 )); then _greet="Good morning"
+elif (( _hr >= 12 && _hr < 17 )); then _greet="Good afternoon"
+elif (( _hr >= 17 && _hr < 21 )); then _greet="Good evening"
+else _greet="Hey"
+fi
+
+# ── memory (macOS) ──────────────────────────────────────────────────────────
+_page=$(sysctl -n hw.pagesize)
+_mtot=$(( $(sysctl -n hw.memsize) / 1073741824 ))
+_mused=$(vm_stat | awk -v ps="$_page" '
+  /Pages active:/     { val=$NF; gsub(/[^0-9]/,"",val); a=val }
+  /Pages wired down:/ { val=$NF; gsub(/[^0-9]/,"",val); w=val }
+  END { printf "%.1f", (a+w)*ps/1073741824 }
+')
+
+# ── last login ──────────────────────────────────────────────────────────────
+_lastlogin=$(last $USER | awk 'NR==2{print $3, $4, $5, $6}')
+
+# ── other info ──────────────────────────────────────────────────────────────
+_host=$(hostname -s)
+_os=$(sw_vers -productVersion)
+_up=$(uptime | sed -E 's/.*up ([^,]+),.*/\1/' | xargs)
+_load=$(sysctl -n vm.loadavg | awk '{print $2}')
+_disk=$(df -h / | awk 'NR==2{print $4 " free / " $2}')
+
+# ── fortune ─────────────────────────────────────────────────────────────────
+_fortune=$(fortune -n 400 -s 2>/dev/null)
+
+# ── output ──────────────────────────────────────────────────────────────────
+echo ""
+printf "  ${_b}${_c}${_greet}, ${USER}!${_r}  ${_d}$(date '+%a %d %b  ·  %H:%M')${_r}\n"
+printf "     ${_d}last login  ${_lastlogin}${_r}\n"
+printf "  ${_d}────────────────────────────────────────────────────────${_r}\n"
+printf "  ${_d}host${_r}  %-24s${_d}macOS${_r}  %s\n"  "$_host"  "$_os"
+printf "  ${_d}up${_r}    %-24s${_d}load${_r}   %s\n"  "$_up"    "$_load"
+printf "  ${_d}mem${_r}   %-24s${_d}disk${_r}   %s\n"  "${_mused}G / ${_mtot}G"  "$_disk"
+if [[ -n "$_fortune" ]]; then
+  printf "  ${_d}────────────────────────────────────────────────────────${_r}\n"
+  echo "$_fortune" | while IFS= read -r line; do
+    printf "  ${_d}%s${_r}\n" "$line"
+  done
+fi
+echo ""
