@@ -100,6 +100,15 @@ eval "$(fzf --zsh)"
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
+# Load in other environment variables.
+# https://stackoverflow.com/questions/19331497/set-environment-variables-from-file-of-key-value-pairs
+unamestr=$(uname)
+if [ "$unamestr" = 'Linux' ]; then
+    export $(grep -v '^#' ~/.env | xargs -d '\n')
+elif [ "$unamestr" = 'FreeBSD' ] || [ "$unamestr" = 'Darwin' ]; then
+    export $(grep -v '^#' ~/.env | xargs -0)
+fi
+
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
 #   export EDITOR='vim'
