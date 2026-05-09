@@ -103,8 +103,11 @@ eval "$(fzf --zsh)"
 # Load in other environment variables.
 # https://stackoverflow.com/questions/19331497/set-environment-variables-from-file-of-key-value-pairs
 unamestr=$(uname)
+# TODO: check if ~/.env even exists; then always use "set -o allexport"
 if [ "$unamestr" = 'Linux' ]; then
-    export $(grep -v '^#' ~/.env | xargs -d '\n')
+    # better version
+    set -o allexport && source ~/.env && set +o allexport
+    #export $(grep -v '^#' ~/.env | xargs -d '\n')
 elif [ "$unamestr" = 'FreeBSD' ] || [ "$unamestr" = 'Darwin' ]; then
     export $(grep -v '^#' ~/.env | xargs -0)
 fi
@@ -140,11 +143,12 @@ alias llm=/Applications/Ollama.app/Contents/MacOS/Ollama
 # To install p10k, run:
 #   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 # To customize prompt, run `p10k configure` or edit ~/dotfiles/.p10k.zsh.
-[[ ! -f ~/dotfiles/.p10k.zsh ]] || source ~/dotfiles/.p10k.zsh
+#[[ ! -f ~/dotfiles/.p10k.zsh ]] || source ~/dotfiles/.p10k.zsh
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # Zoxide install
 #   https://github.com/ajeetdsouza/zoxide
 eval "$(zoxide init zsh)"
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+# Load local env variables
+. "$HOME/.local/share/../bin/env"
