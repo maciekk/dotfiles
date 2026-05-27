@@ -7,6 +7,8 @@ const STATE_TYPE = "checkpoint-state";
 
 export default function (pi: ExtensionAPI) {
   let phase: Phase = "idle";
+  let allowNextCommit = false;
+  let allowNextPush = false;
 
   const setPhase = (next: Phase) => {
     phase = next;
@@ -17,6 +19,8 @@ export default function (pi: ExtensionAPI) {
 
   pi.on("session_start", async (_event, ctx) => {
     phase = "idle";
+    allowNextCommit = false;
+    allowNextPush = false;
     for (const entry of ctx.sessionManager.getEntries()) {
       if (entry.type === "custom" && entry.customType === STATE_TYPE) {
         const maybe = (entry.data as { phase?: Phase } | undefined)?.phase;
@@ -32,6 +36,8 @@ export default function (pi: ExtensionAPI) {
     description: "Create a plan and stop for confirmation",
     handler: async (args, ctx) => {
       setPhase("planned");
+      allowNextCommit = false;
+      allowNextPush = false;
       if (ctx.hasUI) ctx.ui.setStatus("checkpoints", phaseLabel());
       pi.sendUserMessage(
         `Create a concise implementation plan${args ? ` for: ${args}` : ""}. Do not implement yet. End by explicitly asking for confirmation to proceed with implementation.`
@@ -47,6 +53,8 @@ export default function (pi: ExtensionAPI) {
         return;
       }
       setPhase("implemented");
+      allowNextCommit = false;
+      allowNextPush = false;
       if (ctx.hasUI) ctx.ui.setStatus("checkpoints", phaseLabel());
       pi.sendUserMessage(
         `Implement the approved plan${args ? ` with this focus: ${args}` : ""}. After implementation, summarize changes and explicitly ask whether to commit. Do not commit yet.`
@@ -61,7 +69,8 @@ export default function (pi: ExtensionAPI) {
         ctx.ui.notify("Run /implement first.", "warning");
         return;
       }
-      setPhase("committed");
+      allowNextCommit = true;
+      allowNextPush = false;
       if (ctx.hasUI) ctx.ui.setStatus("checkpoints", phaseLabel());
       pi.sendUserMessage(
         `Create an appropriate git commit${args ? ` with this guidance: ${args}` : ""}. After commit, show commit hash and short summary, then explicitly ask whether to push. Do not push yet.`
@@ -70,39 +79,44 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerCommand("push", {
-    description: "Push only after commit and explicit confirmation",
+    description: "Push only after commit",
     handler: async (_args, ctx) => {
       if (phase !== "committed") {
         ctx.ui.notify("Run /commit first.", "warning");
         return;
       }
-      const ok = await ctx.ui.confirm("Push to remote?", "Run git push now?");
-      if (!ok) return;
-      setPhase("idle");
+      allowNextPush = true;
       if (ctx.hasUI) ctx.ui.setStatus("checkpoints", phaseLabel());
       pi.sendUserMessage("Push the current branch to remote now.");
     },
   });
 
-  pi.on("tool_call", async (event, ctx) => {
+  pi.on("tool_call", async (event, _ctx) => {
     if (!isToolCallEventType("bash", event)) return;
 
     const cmd = event.input.command ?? "";
 
     if (/\bgit\s+commit\b/.test(cmd)) {
-      if (phase !== "implemented" && phase !== "committed") {
+      if (phase !== "implemented") {
         return { block: true, reason: "Blocked: run /implement first" };
       }
-      const ok = await ctx.ui.confirm("Allow git commit?", `Command:\n${cmd}`);
-      if (!ok) return { block: true, reason: "Commit blocked by user" };
+      if (!allowNextCommit) {
+        return { block: true, reason: "Blocked: use /commit to authorize git commit" };
+      }
+      allowNextCommit = false;
+      allowNextPush = false;
+      setPhase("committed");
     }
 
     if (/\bgit\s+push\b/.test(cmd)) {
       if (phase !== "committed") {
         return { block: true, reason: "Blocked: run /commit first" };
       }
-      const ok = await ctx.ui.confirm("Allow git push?", `Command:\n${cmd}`);
-      if (!ok) return { block: true, reason: "Push blocked by user" };
+      if (!allowNextPush) {
+        return { block: true, reason: "Blocked: use /push to authorize git push" };
+      }
+      allowNextPush = false;
+      setPhase("idle");
     }
   });
 }
