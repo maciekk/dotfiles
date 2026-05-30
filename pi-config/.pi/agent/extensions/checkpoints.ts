@@ -2,15 +2,20 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { isToolCallEventType } from "@earendil-works/pi-coding-agent";
 
 type Phase = "idle" | "planned" | "implemented" | "committed";
-type WorkflowMode = "strict" | "flexible";
+type WorkflowMode = "strict" | "fast";
 
 const STATE_TYPE = "checkpoint-state";
-const WORKFLOW_MODE: WorkflowMode = "flexible";
+const WORKFLOW_MODE: WorkflowMode = "fast";
+
+const LARGE_CHANGE_FILE_THRESHOLD = 4;
+const LARGE_CHANGE_BYTES_THRESHOLD = 1200;
 
 export default function (pi: ExtensionAPI) {
   let phase: Phase = "idle";
   let allowNextCommit = false;
   let allowNextPush = false;
+  let touchedFiles = new Set<string>();
+  let approxChangedBytes = 0;
 
   const setPhase = (next: Phase) => {
     phase = next;
@@ -19,9 +24,12 @@ export default function (pi: ExtensionAPI) {
 
   const phaseLabel = () => `checkpoints: ${phase} (${WORKFLOW_MODE})`;
 
+  const isLargeChange = () =>
+    touchedFiles.size >= LARGE_CHANGE_FILE_THRESHOLD || approxChangedBytes >= LARGE_CHANGE_BYTES_THRESHOLD;
+
   const nextCommands = () => {
-    if (phase === "idle") return WORKFLOW_MODE === "flexible" ? "/plan, /implement, /commit" : "/plan";
-    if (phase === "planned") return WORKFLOW_MODE === "flexible" ? "/implement, /commit" : "/implement";
+    if (phase === "idle") return WORKFLOW_MODE === "fast" ? "/plan, /implement, /commit" : "/plan";
+    if (phase === "planned") return WORKFLOW_MODE === "fast" ? "/implement, /commit" : "/implement";
     if (phase === "implemented") return "/commit";
     return "/push";
   };
@@ -35,9 +43,15 @@ export default function (pi: ExtensionAPI) {
     allowNextPush = false;
   };
 
+  const resetChangeTracking = () => {
+    touchedFiles = new Set<string>();
+    approxChangedBytes = 0;
+  };
+
   pi.on("session_start", async (_event, ctx) => {
     phase = "idle";
     resetGuards();
+    resetChangeTracking();
     for (const entry of ctx.sessionManager.getEntries()) {
       if (entry.type === "custom" && entry.customType === STATE_TYPE) {
         const maybe = (entry.data as { phase?: Phase } | undefined)?.phase;
@@ -54,6 +68,7 @@ export default function (pi: ExtensionAPI) {
     handler: async (args, ctx) => {
       setPhase("planned");
       resetGuards();
+      resetChangeTracking();
       setStatus(ctx);
       pi.sendUserMessage(
         `Create a concise implementation plan${args ? ` for: ${args}` : ""}. Do not implement yet. End by explicitly asking for confirmation to proceed with implementation.`
@@ -62,7 +77,7 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerCommand("implement", {
-    description: "Implement after planning (or directly in flexible mode)",
+    description: "Implement after planning (or directly in fast mode)",
     handler: async (args, ctx) => {
       if (phase !== "planned") {
         if (WORKFLOW_MODE === "strict") {
@@ -70,7 +85,7 @@ export default function (pi: ExtensionAPI) {
           return;
         }
         if (phase === "idle") {
-          ctx.ui.notify("Flexible mode: proceeding without /plan.", "info");
+          ctx.ui.notify("Fast mode: proceeding without /plan.", "info");
         }
       }
 
@@ -93,7 +108,7 @@ export default function (pi: ExtensionAPI) {
         }
 
         if (phase === "idle" || phase === "planned") {
-          ctx.ui.notify(`Flexible mode: recovering phase from ${phase} to implemented for commit.`, "warning");
+          ctx.ui.notify(`Fast mode: recovering phase from ${phase} to implemented for commit.`, "warning");
           setPhase("implemented");
         }
       }
@@ -101,8 +116,13 @@ export default function (pi: ExtensionAPI) {
       allowNextCommit = true;
       allowNextPush = false;
       setStatus(ctx);
+
+      const caution = isLargeChange()
+        ? "This looks like a larger change; quickly review scope and tests before committing. "
+        : "";
+
       pi.sendUserMessage(
-        `Create an appropriate git commit${args ? ` with this guidance: ${args}` : ""}. After commit, show commit hash and short summary, then explicitly ask whether to push. Do not push yet.`
+        `${caution}Create an appropriate git commit${args ? ` with this guidance: ${args}` : ""}. After commit, show commit hash and short summary, then explicitly ask whether to push. Do not push yet.`
       );
     },
   });
@@ -123,7 +143,10 @@ export default function (pi: ExtensionAPI) {
   pi.registerCommand("status", {
     description: "Show checkpoint workflow status",
     handler: async (_args, ctx) => {
-      ctx.ui.notify(`Mode: ${WORKFLOW_MODE} | Phase: ${phase} | Next: ${nextCommands()}`, "info");
+      ctx.ui.notify(
+        `Mode: ${WORKFLOW_MODE} | Phase: ${phase} | Next: ${nextCommands()} | Files: ${touchedFiles.size} | ~Bytes: ${approxChangedBytes}`,
+        "info"
+      );
       setStatus(ctx);
     },
   });
@@ -133,12 +156,29 @@ export default function (pi: ExtensionAPI) {
     handler: async (_args, ctx) => {
       setPhase("idle");
       resetGuards();
+      resetChangeTracking();
       setStatus(ctx);
       ctx.ui.notify("Checkpoint workflow reset to idle.", "info");
     },
   });
 
   pi.on("tool_call", async (event, _ctx) => {
+    if (isToolCallEventType("write", event)) {
+      touchedFiles.add(event.input.path ?? "(unknown)");
+      approxChangedBytes += (event.input.content ?? "").length;
+      return;
+    }
+
+    if (isToolCallEventType("edit", event)) {
+      touchedFiles.add(event.input.path ?? "(unknown)");
+      for (const change of event.input.edits ?? []) {
+        const oldLen = (change.oldText ?? "").length;
+        const newLen = (change.newText ?? "").length;
+        approxChangedBytes += Math.abs(newLen - oldLen) + Math.min(newLen, 400);
+      }
+      return;
+    }
+
     if (!isToolCallEventType("bash", event)) return;
 
     const cmd = event.input.command ?? "";
@@ -159,6 +199,7 @@ export default function (pi: ExtensionAPI) {
       allowNextCommit = false;
       allowNextPush = false;
       setPhase("committed");
+      resetChangeTracking();
     }
 
     if (/\bgit\s+push\b/.test(cmd)) {
@@ -176,6 +217,7 @@ export default function (pi: ExtensionAPI) {
       }
       allowNextPush = false;
       setPhase("idle");
+      resetChangeTracking();
     }
   });
 }
