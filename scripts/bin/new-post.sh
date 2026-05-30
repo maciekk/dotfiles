@@ -2,6 +2,10 @@
 #
 # Create a new post in my Hugo website. (gohugo.io)
 
+# Usage
+#   $ new-post.sh blog-post-alpha.md         # ".md file as blog post"
+#   $ new-post.sh blog-post-beta/index.md    # "directory as blog post"
+
 FNAME=$1
 FNAME_PATH=content/posts/$(date +%Y)/$FNAME
 
