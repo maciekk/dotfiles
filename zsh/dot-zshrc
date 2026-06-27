@@ -151,4 +151,5 @@ alias llm=/Applications/Ollama.app/Contents/MacOS/Ollama
 eval "$(zoxide init zsh)"
 
 # Load local env variables
-. "$HOME/.local/share/../bin/env"
+[ -f "$HOME/.env" ] && export $(grep -v '^#' "$HOME/.env" | xargs)
+
