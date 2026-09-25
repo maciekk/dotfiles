@@ -155,9 +155,6 @@ alias llm=/Applications/Ollama.app/Contents/MacOS/Ollama
 #   https://github.com/ajeetdsouza/zoxide
 eval "$(zoxide init zsh)"
 
-# Load local env variables
-[ -f "$HOME/.env" ] && export $(grep -v '^#' "$HOME/.env" | xargs)
-
 # try setup
 eval "$(/usr/bin/try init ~/src/tries)"
 export PATH="$HOME/.local/bin:$PATH"

@@ -53,7 +53,7 @@ _fortune=$(fortune -n 400 -s 2>/dev/null)
 # ── output ──────────────────────────────────────────────────────────────────
 echo ""
 printf "  ${_b}${_c}${_greet}, ${USER}!${_r}  ${_d}$(date '+%a %d %b  ·  %H:%M')${_r}\n"
-printf "     ${_d}last login  ${_lastlogin}${_r}\n"
+printf "     ${_d}last login  %s${_r}\n" "$_lastlogin"
 printf "  ${_d}────────────────────────────────────────────────────────${_r}\n"
 printf "  ${_d}host${_r}  %-24s${_d}${_os_label}${_r}  %s\n"  "$_host"  "$_os"
 printf "  ${_d}up${_r}    %-24s${_d}load${_r}   %s\n"  "$_up"    "$_load"
