@@ -89,8 +89,7 @@ export default function (pi: ExtensionAPI) {
 					let input = 0;
 					let output = 0;
 					let cost = 0;
-					let latestCacheHitRate: number | undefined;
-					let hasCacheActivity = false;
+					let latestCacheHitRate = 0;
 
 					for (const entry of ctx.sessionManager.getBranch()) {
 						if (entry.type === "message" && entry.message.role === "assistant") {
@@ -98,9 +97,8 @@ export default function (pi: ExtensionAPI) {
 							input += message.usage.input;
 							output += message.usage.output;
 							cost += message.usage.cost.total;
-							hasCacheActivity ||= message.usage.cacheRead > 0 || message.usage.cacheWrite > 0;
 							const promptTokens = message.usage.input + message.usage.cacheRead + message.usage.cacheWrite;
-							latestCacheHitRate = promptTokens > 0 ? (message.usage.cacheRead / promptTokens) * 100 : undefined;
+							latestCacheHitRate = promptTokens > 0 ? (message.usage.cacheRead / promptTokens) * 100 : 0;
 						}
 					}
 
@@ -117,42 +115,54 @@ export default function (pi: ExtensionAPI) {
 					const locationLine = truncateToWidth(location, width, theme.fg("dim", "..."));
 
 					const usage = ctx.getContextUsage();
-					const contextWindow = usage?.contextWindow ?? ctx.model?.contextWindow ?? 0;
 					const contextPercent = usage?.percent;
-					const contextText = `${contextPercent === null || contextPercent === undefined ? "?" : contextPercent.toFixed(1)}%/${formatTokens(contextWindow)}`;
-					const styledContext = theme.bold(
-						(contextPercent ?? 0) > 90
-							? theme.fg("error", contextText)
-							: (contextPercent ?? 0) > 70
-								? theme.fg("warning", contextText)
-								: theme.fg("success", contextText),
-					);
+					const contextValue = contextPercent ?? 0;
+					const contextBarWidth = 8;
+					const contextFilled = Math.max(0, Math.min(contextBarWidth, Math.round((contextValue / 100) * contextBarWidth)));
+					const contextBar = `${"█".repeat(contextFilled)}${"░".repeat(contextBarWidth - contextFilled)}`;
+					const contextText = `ctx ${contextBar}`;
+					const styledContext = `${theme.fg("dim", "ctx ")}${theme.bg("customMessageBg", theme.fg("muted", "█".repeat(contextFilled)))}${theme.bg("customMessageBg", theme.fg("dim", "░".repeat(contextBarWidth - contextFilled)))}`;
 
-					const usageParts: string[] = [];
-					const styledUsageParts: string[] = [];
-					if (input > 0) {
-						usageParts.push(`↑${formatTokens(input)}`);
-						styledUsageParts.push(`${theme.fg("dim", "↑")}${theme.bold(formatTokens(input))}`);
-					}
-					if (output > 0) {
-						usageParts.push(`↓${formatTokens(output)}`);
-						styledUsageParts.push(`${theme.fg("dim", "↓")}${theme.bold(formatTokens(output))}`);
-					}
-					if (cost > 0) {
-						usageParts.push(`$${cost.toFixed(3)}`);
-						styledUsageParts.push(`${theme.fg("dim", "$")}${theme.bold(cost.toFixed(3))}`);
-					}
-					if (hasCacheActivity && latestCacheHitRate !== undefined) {
-						const cacheRate = `${latestCacheHitRate.toFixed(1)}%`;
-						usageParts.push(`CH${cacheRate}`);
-						styledUsageParts.push(`${theme.fg("dim", "CH")}${theme.bold(cacheRate)}`);
-					}
+					const cacheRate = `${latestCacheHitRate.toFixed(1)}%`;
+					const usageParts = [`↑${formatTokens(input)}`, `↓${formatTokens(output)}`, `CH${cacheRate}`, `$${cost.toFixed(2)}`];
+					const styledUsageParts = [
+						`${theme.fg("dim", "↑")}${theme.bold(formatTokens(input))}`,
+						`${theme.fg("dim", "↓")}${theme.bold(formatTokens(output))}`,
+						`${theme.fg("dim", "CH")}${theme.bold(cacheRate)}`,
+						`${theme.fg("dim", "$")}${theme.bold(cost.toFixed(2))}`,
+					];
 					const usageText = usageParts.join(" ");
 					const styledUsage = styledUsageParts.join(" ");
+
+					const statusParts = [...footerData.getExtensionStatuses().entries()]
+						.sort(([a], [b]) => a.localeCompare(b))
+						.map(([key, text]) => ({
+							key,
+							text:
+								key === "usage"
+									? text.replace(/^codex\s+/i, "").replace(/(\d+%)\s+(5h|wk)\b/gi, "$2 $1")
+									: text,
+						}));
+					const statusPlain = statusParts.map(({ text }) => text).join(" ");
+					const styledStatus = statusParts
+						.map(({ text }) =>
+							text
+								.split(/(\d+%)/g)
+								.map((part) => {
+									const percent = /^(\d+)%$/.exec(part);
+									if (!percent) return theme.fg("dim", part);
+									const value = Number(percent[1]);
+									const color = value > 90 ? "error" : value > 70 ? "warning" : "success";
+									return theme.bold(theme.fg(color, part));
+								})
+								.join(""),
+						)
+						.join(" ");
+
 					const activityPlain = isWorking ? `${spinnerFrames[spinnerIndex]} ` : "";
 					const activity = isWorking ? `${theme.fg("accent", spinnerFrames[spinnerIndex])} ` : "";
-					const leftPlain = `${activityPlain}${usageText}${usageText ? " " : ""}${contextText}`;
-					const left = `${activity}${styledUsage}${styledUsage ? " " : ""}${styledContext}`;
+					const leftPlain = [activityPlain + usageText, contextText, statusPlain].filter(Boolean).join(" ");
+					const left = [activity + styledUsage, styledContext, styledStatus].filter(Boolean).join(" ");
 
 					const model = ctx.model?.id ?? "no-model";
 					const provider = ctx.model?.provider;
@@ -176,14 +186,7 @@ export default function (pi: ExtensionAPI) {
 						"",
 					);
 
-					const lines = [locationLine, visibleWidth(leftPlain) <= width ? statsLine : truncateToWidth(left, width, "")];
-					const statuses = [...footerData.getExtensionStatuses().entries()]
-						.sort(([a], [b]) => a.localeCompare(b))
-						.map(([, text]) => text);
-					if (statuses.length > 0) {
-						lines.push(truncateToWidth(statuses.join(" "), width, theme.fg("dim", "...")));
-					}
-					return lines;
+					return [locationLine, visibleWidth(leftPlain) <= width ? statsLine : truncateToWidth(left, width, "")];
 				},
 			};
 		});

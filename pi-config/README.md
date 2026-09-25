@@ -21,10 +21,11 @@ stow -D -t $HOME --dotfiles pi-config
 ## Included
 
 - `.pi/agent/extensions/statusline.ts`
-  - keeps the standard location, usage, context, model, and thinking-level information
-  - shows the model in bold white and thinking levels up to `medium` in green
-  - highlights `high` thinking with the warning colour and `xhigh`/`max` with the error colour
-  - emphasizes usage values, shows the latest prompt's cache hit rate, and colour-codes context pressure
-  - shows staged, unstaged, and untracked Git counts plus an activity spinner
+  - stable, compact one-line token stats, context bar, Git counts, activity spinner, model, and thinking level
+  - displays Codex 5-hour and weekly **used** budgets from the `pi-usage` status item
+- `.pi/agent/settings.json`
+  - enables `@narumitw/pi-usage` and the web-search package
+- `.pi/agent/pi-usage.json`
+  - configures budget values as used percentages and labels the windows as `5h` / `wk`
 
 After installing/updating, run `/reload` inside pi.
