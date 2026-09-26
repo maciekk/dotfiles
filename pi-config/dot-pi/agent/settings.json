@@ -9,6 +9,8 @@
   "terminal": {
     "showTerminalProgress": true
   },
+  "tuiMode": "fullscreen",
   "theme": "dark",
-  "defaultThinkingLevel": "medium"
+  "defaultThinkingLevel": "medium",
+  "lastChangelogVersion": "0.87.1"
 }
