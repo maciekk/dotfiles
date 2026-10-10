@@ -1,0 +1,32 @@
+# Theme and Window Appearance
+theme = dark:dracula,light:Github
+background-opacity = 0.95
+background-blur = true
+window-padding-x = 12
+window-padding-y = 12
+window-padding-balance = true
+macos-titlebar-style = hidden
+
+# Typography
+#font-family = "JetBrains Mono"
+#font-family = "JetBrainsMono Nerd Font Mono"
+font-family = "JetBrainsMono Nerd Font Mono"
+#font-family = "Andale Mono"
+font-size = 16
+#line-height = 1.2  # this option no longer exists?
+cursor-style = block
+
+# Behavior
+mouse-hide-while-typing = true
+scrollback-limit = 90000
+copy-on-select = true
+
+# Keyboard
+# Send Option as Meta/Alt instead of composing macOS special characters, so
+# tmux receives M-* keys. Without this, prefix M-r (reload), M-h/M-j/M-k/M-l
+# (resize pane) and M-U (tpm update) silently do nothing — Option-r produces
+# "®" rather than Meta-r. Costs the Option-key glyphs (®, ¶, ø, ...).
+macos-option-as-alt = true
+
+# Disable directory inheritance for brand new windows
+window-inherit-working-directory = false
