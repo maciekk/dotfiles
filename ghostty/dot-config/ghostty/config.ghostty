@@ -1,0 +1,36 @@
+
+# Theme and Visuals
+# Example theme, list available with `ghostty +list themes`
+#theme = "dark:GrooveBox,light:GrooveBox"
+#theme = "Catppuccin Frappe"
+#theme = "Monokai Pro Ristretto"
+#theme = 3024 Night
+
+
+# – Dark themes
+#theme = Adventure
+#theme = Calamity
+#theme = IC Orange PPL
+#theme = Fahrenheit
+
+# – Light themes
+#theme = GitHub
+#theme = light:Catppuccin Latte,dark:Catppuccin Frappe
+theme = light:GitHub,dark:Catppuccin Frappe
+
+background-opacity = 0.98
+background-blur-radius = 20
+window-padding-x = 10
+window-padding-y = 10
+
+# Font
+font-family = "JetBrainsMono Nerd Font"
+font-size = 18
+adjust-cell-height = 10%
+
+# MacOS Specific
+macos-titlebar-style = "hidden"
+
+# Behavior
+copy-on-select = true
+mouse-hide-while-typing = true
