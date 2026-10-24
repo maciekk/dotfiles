@@ -162,10 +162,12 @@ alias ls="ls -p"
 eval "$(zoxide init zsh)"
 
 # try setup
-eval "$(/usr/bin/try init ~/src/tries)"
+if (( $+commands[try] )); then
+  eval "$(try init "$HOME/src/tries")"
+fi
 export PATH="$HOME/.local/bin:$PATH"
 
-. "$HOME/.local/share/../bin/env"
+[[ -r "$HOME/.local/bin/env" ]] && source "$HOME/.local/bin/env"
 
 # Go setup
 go env -w GONOPROXY="*.indexexchange.com"
