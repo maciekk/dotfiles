@@ -15,8 +15,8 @@
 
 # – Light themes
 #theme = GitHub
-#theme = light:Catppuccin Latte,dark:Catppuccin Frappe
-theme = light:GitHub,dark:Catppuccin Frappe
+theme = light:Catppuccin Latte,dark:Catppuccin Frappe
+#theme = light:GitHub,dark:Catppuccin Frappe
 
 background-opacity = 0.98
 background-blur-radius = 20
