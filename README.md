@@ -77,6 +77,26 @@ Verify the loaded config before changing it: `/reload` does not install or link
 repository files. See [pi-config/README.md](pi-config/README.md) for
 installation instructions.
 
+**Pi installation on Omarchy:** this machine deliberately uses Omarchy's
+mise-managed Pi rather than a separate npm or `pi.dev` installer. The global
+mise config at `~/.config/mise/config.toml` requests `pi = "latest"`, and `pi`
+resolves to `~/.local/share/mise/installs/pi/latest/pi/pi`. Omarchy's updater
+runs `mise up`, so normal `omarchy update` runs and manual Pi upgrades operate
+on the same installation instead of creating competing executables.
+
+If Pi reports that a newer release is available before Omarchy has installed
+it, update that same managed installation with:
+
+```sh
+MISE_MINIMUM_RELEASE_AGE=0 mise upgrade --global pi
+```
+
+Start a new Pi session afterwards and check `pi --version`. Do not also install
+Pi globally with npm or the `pi.dev` shell installer: either can put another
+`pi` earlier in `PATH`, bypassing the Omarchy/mise-managed version. Mise's
+`upgrade.auto_prune = false` setting keeps the old executable available while
+an already-running Pi session finishes.
+
 **Powerlevel10k:** on Omarchy, the prompt reads the resolved semantic colors
 from the current theme, including legacy themes whose palette only defines ANSI
 colors. It checks the Omarchy theme name at most every 15 seconds before a new
