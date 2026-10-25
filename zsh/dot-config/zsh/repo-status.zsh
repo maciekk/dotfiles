@@ -47,6 +47,19 @@ _repos_fetch() {
   return $result
 }
 
+# A submodule is normally detached at the commit recorded by its parent.
+_repos_pinned_submodule() {
+  emulate -L zsh
+  local repo=${1:A} parent relative pinned head
+  parent=$(git -C "$repo" rev-parse --show-superproject-working-tree 2>/dev/null) || return 1
+  [[ -n $parent ]] || return 1
+  parent=${parent:A}
+  relative=${repo#"$parent"/}
+  pinned=$(git -C "$parent" rev-parse --verify "HEAD:$relative" 2>/dev/null) || return 1
+  head=$(git -C "$repo" rev-parse --verify HEAD 2>/dev/null) || return 1
+  [[ $head == $pinned ]]
+}
+
 _repos_scan_one() {
   emulate -L zsh
   local repo=$1 fetch_due=$2 flags='' branch upstream counts dirty remotes
@@ -83,8 +96,15 @@ _repos_scan_one() {
     (( pair[1] > 0 )) && [[ $flags != *U* ]] && flags+=U
     (( pair[2] > 0 )) && [[ $flags != *B* ]] && flags+=B
   done
-  # Detached commits have no branch/upstream publication policy.
-  git -C "$repo" symbolic-ref -q HEAD >/dev/null || flags+=Q
+  # A detached submodule follows its parent's pin, not the remote's latest
+  # commit. Behind branches are expected there; preserve all other warnings.
+  if ! git -C "$repo" symbolic-ref -q HEAD >/dev/null; then
+    if _repos_pinned_submodule "$repo"; then
+      flags=${flags//B/}
+    else
+      [[ $flags == *Q* ]] || flags+=Q
+    fi
+  fi
   print -r -- "${flags:--}"$'\t'"$repo"
 }
 

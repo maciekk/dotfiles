@@ -129,4 +129,37 @@ DRIVER
     exit 1
   fi
 fi
+# A detached submodule matching its parent's committed pin is not unknown.
+parent="$tmp/submodule parent"
+module="$parent/theme with spaces"
+git init -q "$parent"
+git -C "$parent" config user.name Test
+git -C "$parent" config user.email test@example.com
+git -C "$parent" -c protocol.file.allow=always submodule add -q "$tmp/remote" 'theme with spaces'
+git -C "$parent" commit -qm 'pin submodule'
+git -C "$module" checkout -q --detach
+[[ $(_repos_scan_one "$module" no) == "-"$'\t'"$module" ]]
+# Behind local branches are normal only for correctly pinned detached modules.
+git -C "$module" branch -f master HEAD~1
+[[ $(_repos_scan_one "$module" no) == "-"$'\t'"$module" ]]
+git -C "$module" checkout -q master
+[[ $(_repos_scan_one "$module" no) == "B"$'\t'"$module" ]]
+git -C "$module" checkout -q --detach origin/master
+# Dirty files and cached fetch failures must remain visible, even when behind.
+print dirty > "$module/untracked"
+[[ $(_repos_scan_one "$module" no) == "M"$'\t'"$module" ]]
+rm "$module/untracked"
+[[ $(_repos_scan_one "$module" no F) == "F"$'\t'"$module" ]]
+# A different detached commit still reports both behind and unknown.
+git -C "$module" checkout -q HEAD~1
+[[ $(_repos_scan_one "$module" no) == "BQ"$'\t'"$module" ]]
+git -C "$module" checkout -q origin/master
+# Unpushed commits on another branch must not be suppressed.
+ahead=$(print local | git -C "$module" -c user.name=Test -c user.email=test@example.com commit-tree 'HEAD^{tree}' -p HEAD)
+git -C "$module" branch -f master "$ahead"
+[[ $(_repos_scan_one "$module" no) == "U"$'\t'"$module" ]]
+git -C "$module" branch -f master origin/master
+# Even a correctly pinned submodule still reports untracked local branches.
+git -C "$module" branch forgotten
+[[ $(_repos_scan_one "$module" no) == "Q"$'\t'"$module" ]]
 print 'repo-status tests passed'

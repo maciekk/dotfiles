@@ -158,7 +158,10 @@ it from the current-repository Git status.
 All local branches are checked, not just the current branch. Divergence shows
 both arrows. Upstream comparisons are a useful publication heuristic, not proof
 that a commit exists nowhere else. Intentionally private branches without an
-upstream also show `?`.
+upstream also show `?`. A submodule's detached HEAD is accepted when it matches
+the commit pinned in its parent's HEAD. Behind-remote warnings are suppressed
+for these pinned detached submodules; modifications, unpushed commits, fetch
+failures, and missing-upstream warnings still apply.
 
 Install with `./do-stow.sh zsh`, then open a new shell. Implementation lives in
 `zsh/dot-config/zsh/repo-status.zsh`; `.zshrc` only sources it and p10k adds one
