@@ -130,3 +130,82 @@ NVIM_APPNAME=nvim-maciek nvim
 When the `zsh` package is installed, `v` runs the latter command while `nvim`
 continues to use Omarchy's LazyVim config. Neovim also isolates the associated
 data, state, and cache directories under names ending in `nvim-maciek`.
+
+## Repository publication indicator (zsh / Powerlevel10k)
+
+The right prompt shows local unpublished work, even outside a Git repository:
+
+```text
+d:1↑ &:2↑3*
+```
+
+`d:` is this dotfiles checkout; `&:` is other working-tree repositories discovered
+recursively under `~/src/` (including nested directories and Git worktrees).
+Counts mean **repositories**, not commits/files; a repo can count in multiple
+categories. Zero counts and empty groups disappear; clean means no segment.
+The segment uses a pastel rosewater background with dark text to distinguish
+it from the current-repository Git status.
+
+| Symbol | Meaning |
+| --- | --- |
+| `↑` | Local branch ahead of its upstream |
+| `*` | Uncommitted changes, including untracked files |
+| `↓` | Local branch behind its upstream |
+| `?` | Unknown: missing upstream, detached HEAD, Git error, or failed fetch |
+| `~` | Remote information is stale / refresh in progress |
+| `…` | Initial scan has not finished |
+
+All local branches are checked, not just the current branch. Divergence shows
+both arrows. Upstream comparisons are a useful publication heuristic, not proof
+that a commit exists nowhere else. Intentionally private branches without an
+upstream also show `?`.
+
+Install with `./do-stow.sh zsh`, then open a new shell. Implementation lives in
+`zsh/dot-config/zsh/repo-status.zsh`; `.zshrc` only sources it and p10k adds one
+custom segment beside `context`. The indicator does not depend on SSH/context
+visibility and does not replace the current-directory Git segment.
+
+```sh
+repos status   # cached per-repo details, local scan ages, and summary
+repos refresh  # synchronous local rescan; also fetches if the fetch interval is due
+```
+
+No cron or daemon: a pre-prompt hook reads cached data and launches a detached
+worker when due. Dotfiles is checked every 15 seconds, other repos every 60
+seconds, and remotes are fetched every 15 minutes **while shells are active**.
+The next prompt picks up completed results; the worker never redraws your input.
+Fetches suppress credential prompts and have a 30-second limit per repository.
+No commits, pushes, pulls, checkouts, or working-tree changes are automated.
+
+Each machine stores private cache files under
+`${XDG_CACHE_HOME:-~/.cache}/repo-status`. Atomic replacement prevents partial
+reads; a shared kernel-managed lock prevents duplicate workers and is released
+on crashes. Explicit `repos refresh` reports an error if another worker holds
+that lock, rather than silently leaving the cache unchanged. Background workers
+ignore terminal job-control signals so they cannot get suspended by tty handling.
+Fetch failures remain `?` until a successful retry; old remote state
+is marked `~`. Large/offline repo collections can take time to refresh.
+
+Optional machine-local settings, **before the module is sourced** in `.zshrc`
+(or exported by your existing local environment setup):
+
+```sh
+export REPOS_ROOT="$HOME/src"
+export REPOS_DOTFILES="$HOME/src/dotfiles"  # defaults to the module's checkout
+export REPOS_EXCLUDE="$HOME/src/experiments:$HOME/src/vendor"
+export REPOS_DOT_INTERVAL=15
+export REPOS_SRC_INTERVAL=60
+export REPOS_FETCH_INTERVAL=900
+```
+
+Exclusions are colon-separated absolute directories, including descendants;
+dotfiles remains monitored separately. Discovery skips `.git` internals and
+`node_modules`, and does not follow directory symlinks. Bare repositories and
+paths containing tabs/newlines are not supported.
+
+Tests (temporary repositories, no network):
+
+```sh
+zsh scripts/tests/repo-status.zsh
+zsh scripts/tests/p10k-appearance.zsh
+```

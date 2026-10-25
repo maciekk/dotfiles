@@ -7,7 +7,7 @@ trap 'rm -rf -- "$tmp"' EXIT
 export HOME="$tmp" XDG_CONFIG_HOME="$tmp/.config"
 ln -s "$root/zsh/dot-p10k.zsh" "$HOME/.p10k.zsh"
 source "$root/zsh/dot-config/zsh/appearance.zsh"
-autoload -Uz add-zsh-hook
+source "$root/zsh/dot-config/zsh/repo-status.zsh"
 add-zsh-hook precmd p10k_appearance_check
 # Mock detection and the p10k API, but exercise the real polling and config reload.
 typeset simulated=light
@@ -30,6 +30,9 @@ for simulated in light dark light; do
   else
     [[ $POWERLEVEL9K_OS_ICON_BACKGROUND == '#414559' ]]
   fi
+  [[ ${POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS[(r)repo_status]} == repo_status ]]
+  (( $+functions[prompt_repo_status] ))
+  [[ ${precmd_functions[(r)_repos_precmd]} == _repos_precmd ]]
   [[ ${precmd_functions[(r)p10k_appearance_check]} == p10k_appearance_check ]]
 done
 # Within the polling interval, don't change mode or reload the config.
