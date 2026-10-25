@@ -28,6 +28,7 @@ config defaults.
 | Ghostty | macOS appearance, native switching | Catppuccin Latte / Catppuccin Frappe | `ghostty/dot-config/ghostty/config.ghostty` |
 | tmux | macOS appearance, checked every 15 seconds while attached | Catppuccin Latte / Catppuccin Mocha | `tmux/dot-config/tmux/appearance.sh` and `theme-*.conf` |
 | pi | Terminal appearance (following Ghostty) | Built-in `light` / `dark` | `pi-config/dot-pi/agent/settings.json` and live `~/.pi/agent/settings.json` |
+| Powerlevel10k | macOS appearance; tmux's selected mode when inside tmux | Catppuccin Latte / Frappe prompt palette | `zsh/dot-config/zsh/appearance.zsh` and `zsh/dot-p10k.zsh` |
 
 **Ghostty:** the effective setting on this Mac is:
 
@@ -70,6 +71,23 @@ not linked to the tracked package, and `/reload` does not install or link
 repository files. See [pi-config/README.md](pi-config/README.md) for
 installation instructions.
 
+**Powerlevel10k:** the shell checks appearance before the first prompt and then
+at most every 15 seconds before a new prompt. In tmux it adopts tmux's current
+selection, including tmux's manual override. It uses a Latte palette in light
+mode and Frappe in dark mode; the generated configuration's remaining ANSI
+colours continue to come from the terminal theme.
+
+Run in zsh to pin the prompt independently or restore automatic behaviour:
+
+```sh
+p10k-theme light
+p10k-theme dark
+p10k-theme auto
+```
+
+The selection lives in ignored `~/.config/p10k/theme-mode.local`. Open a new
+shell (or `source ~/.zshrc`) after installing the `zsh` package.
+
 ### Adding another themed tool
 
 1. Identify its **actual loaded config**, including local overrides and Stow
@@ -94,6 +112,8 @@ installation instructions.
   After changing the config, run `tmux source-file ~/.config/tmux/tmux.conf`.
 - In pi, check `/settings`, launch flags, and loaded extensions. Terminal
   background colours and pi's own theme can change independently.
+- In zsh, inspect `$P10K_APPEARANCE`; run `p10k-theme auto` to remove a prompt
+  override, then press Enter after tmux's next appearance check.
 
 ## Neovim
 

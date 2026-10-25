@@ -155,7 +155,12 @@ alias ls="ls -p"
 #   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 # To customize prompt, run `p10k configure` or edit ~/dotfiles/.p10k.zsh.
 #[[ ! -f ~/dotfiles/.p10k.zsh ]] || source ~/dotfiles/.p10k.zsh
+[[ ! -r ~/.config/zsh/appearance.zsh ]] || source ~/.config/zsh/appearance.zsh
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+if (( $+functions[p10k_appearance_check] )); then
+  autoload -Uz add-zsh-hook
+  add-zsh-hook precmd p10k_appearance_check
+fi
 
 # Zoxide install
 #   https://github.com/ajeetdsouza/zoxide
