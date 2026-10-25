@@ -3,29 +3,41 @@
 # selected appearance so the prompt and status line remain in sync.
 
 : ${XDG_CONFIG_HOME:=$HOME/.config}
-typeset -g P10K_APPEARANCE
+typeset -g P10K_APPEARANCE P10K_THEME_SIGNATURE
 integer -g _p10k_appearance_last_check=0
 
 _p10k_appearance_select() {
-  local mode=auto appearance=light tmux_appearance
+  local mode=auto appearance=light tmux_appearance omarchy_theme
   local mode_file="$XDG_CONFIG_HOME/p10k/theme-mode.local"
+  local omarchy_theme_file="$HOME/.local/state/omarchy/current/theme.name"
+
+  [[ -r $omarchy_theme_file ]] && IFS= read -r omarchy_theme < "$omarchy_theme_file"
 
   [[ -r $mode_file ]] && IFS= read -r mode < "$mode_file"
   case $mode in
     light|dark) appearance=$mode ;;
     auto)
-      if [[ -n $TMUX ]] && (( $+commands[tmux] )); then
-        tmux_appearance=$(tmux show-option -gqv @appearance-current 2>/dev/null)
+      if [[ -n $omarchy_theme ]] && (( $+commands[omarchy-theme-color] )); then
+        if [[ $omarchy_theme == $P10K_THEME_SIGNATURE && $P10K_APPEARANCE == (light|dark) ]]; then
+          appearance=$P10K_APPEARANCE
+        else
+          appearance=$(omarchy-theme-color mode 2>/dev/null)
+          [[ $appearance == (light|dark) ]] || appearance=dark
+        fi
+      else
+        if [[ -n ${TMUX:-} ]] && (( $+commands[tmux] )); then
+          tmux_appearance=$(tmux show-option -gqv @appearance-current 2>/dev/null)
+        fi
+        case $tmux_appearance in
+          light|dark) appearance=$tmux_appearance ;;
+          *)
+            if [[ $(uname -s) == Darwin ]] &&
+               [[ $(defaults read -g AppleInterfaceStyle 2>/dev/null) == Dark ]]; then
+              appearance=dark
+            fi
+            ;;
+        esac
       fi
-      case $tmux_appearance in
-        light|dark) appearance=$tmux_appearance ;;
-        *)
-          if [[ $(uname -s) == Darwin ]] &&
-             [[ $(defaults read -g AppleInterfaceStyle 2>/dev/null) == Dark ]]; then
-            appearance=dark
-          fi
-          ;;
-      esac
       ;;
     *)
       print -u2 "Invalid p10k theme mode in $mode_file: $mode"
@@ -34,6 +46,7 @@ _p10k_appearance_select() {
   esac
 
   typeset -g P10K_APPEARANCE=$appearance
+  typeset -g P10K_THEME_SIGNATURE=$omarchy_theme
 }
 
 p10k_appearance_check() {
@@ -42,9 +55,10 @@ p10k_appearance_check() {
   (( now - _p10k_appearance_last_check >= 15 )) || return
   _p10k_appearance_last_check=$now
 
-  local previous=$P10K_APPEARANCE
+  local previous=$P10K_APPEARANCE previous_theme=$P10K_THEME_SIGNATURE
   _p10k_appearance_select || return
-  [[ $P10K_APPEARANCE == $previous ]] || source "$HOME/.p10k.zsh"
+  [[ $P10K_APPEARANCE == $previous && $P10K_THEME_SIGNATURE == $previous_theme ]] ||
+    source "$HOME/.p10k.zsh"
 }
 
 # Pin this prompt independently, or return it to the shared automatic policy.

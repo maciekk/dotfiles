@@ -1823,16 +1823,37 @@
   #              seen the warning, or if you are unsure what this all means.
   typeset -g POWERLEVEL9K_INSTANT_PROMPT=verbose
 
-  # Palette selected by ~/.config/zsh/appearance.zsh. Keep this close to the reload below so
-  # it overrides the wizard's static rainbow values. The terminal still supplies its ANSI palette;
-  # neutral surfaces follow appearance; Frappe pastel accents stay soft in both modes.
-  if [[ $P10K_APPEARANCE == light ]]; then
-    local p10k_text='#4c4f69' p10k_surface='#ccd0da'
-  else
-    local p10k_text='#c6d0f5' p10k_surface='#414559'
+  # Keep this close to the reload below so it overrides the wizard's static rainbow values.
+  # Omarchy's resolved semantic palette is authoritative on Omarchy; elsewhere neutral surfaces
+  # follow appearance while Frappe pastel accents stay soft in both modes.
+  local -A p10k_omarchy_palette
+  local p10k_color_key p10k_color_value
+  if [[ -r $HOME/.local/state/omarchy/current/theme/colors.toml ]] &&
+     (( $+commands[omarchy-theme-color] )); then
+    while IFS=$'\t' read -r p10k_color_key p10k_color_value; do
+      [[ -n $p10k_color_key && -n $p10k_color_value ]] || continue
+      p10k_omarchy_palette[$p10k_color_key]=$p10k_color_value
+    done < <(omarchy-theme-color --all 2>/dev/null)
   fi
-  local p10k_ink='#303446'
-  local p10k_blue='#8caaee' p10k_green='#a6d189' p10k_yellow='#e5c890' p10k_red='#e78284'
+
+  local p10k_text p10k_surface p10k_ink p10k_blue p10k_green p10k_yellow p10k_red
+  if [[ -n ${p10k_omarchy_palette[background]:-} ]]; then
+    p10k_text=${p10k_omarchy_palette[foreground]}
+    p10k_surface=${p10k_omarchy_palette[lighter_background]}
+    p10k_ink=${p10k_omarchy_palette[background]}
+    p10k_blue=${p10k_omarchy_palette[blue]}
+    p10k_green=${p10k_omarchy_palette[green]}
+    p10k_yellow=${p10k_omarchy_palette[yellow]}
+    p10k_red=${p10k_omarchy_palette[red]}
+  else
+    if [[ $P10K_APPEARANCE == light ]]; then
+      p10k_text='#4c4f69' p10k_surface='#ccd0da'
+    else
+      p10k_text='#c6d0f5' p10k_surface='#414559'
+    fi
+    p10k_ink='#303446'
+    p10k_blue='#8caaee' p10k_green='#a6d189' p10k_yellow='#e5c890' p10k_red='#e78284'
+  fi
   typeset -g POWERLEVEL9K_OS_ICON_FOREGROUND=$p10k_text
   typeset -g POWERLEVEL9K_OS_ICON_BACKGROUND=$p10k_surface
   typeset -g POWERLEVEL9K_DIR_BACKGROUND=$p10k_blue
@@ -1855,6 +1876,11 @@
   typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_BACKGROUND=$p10k_yellow
   typeset -g POWERLEVEL9K_VIRTUALENV_FOREGROUND=$p10k_ink
   typeset -g POWERLEVEL9K_VIRTUALENV_BACKGROUND=$p10k_blue
+
+  # Keep machine-specific palette changes outside this tracked generated file. Load them last so
+  # repository updates and appearance reloads cannot overwrite the local theme.
+  local p10k_theme_override=${XDG_CONFIG_HOME:-$HOME/.config}/p10k/theme.local.zsh
+  [[ ! -r $p10k_theme_override ]] || source "$p10k_theme_override"
 
   # Hot reload allows you to change POWERLEVEL9K options after Powerlevel10k has been initialized.
   # For example, you can type POWERLEVEL9K_BACKGROUND=red and see your prompt turn red. Hot reload

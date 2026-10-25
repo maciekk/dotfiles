@@ -39,4 +39,42 @@ done
 simulated=dark
 p10k_appearance_check || true
 [[ $P10K_APPEARANCE == light ]]
+# Omarchy's semantic colors replace the fallback palette when its current theme is available.
+mkdir -p "$HOME/.local/state/omarchy/current/theme" "$HOME/bin"
+: > "$HOME/.local/state/omarchy/current/theme/colors.toml"
+cat > "$HOME/bin/omarchy-theme-color" <<'EOF'
+#!/bin/sh
+cat <<'COLORS'
+background	#101010
+foreground	#eeeeee
+lighter_background	#303030
+blue	#4455aa
+green	#55aa44
+yellow	#aaaa44
+red	#aa4455
+COLORS
+EOF
+chmod +x "$HOME/bin/omarchy-theme-color"
+path=("$HOME/bin" $path)
+rehash
+source "$HOME/.p10k.zsh"
+[[ $POWERLEVEL9K_OS_ICON_BACKGROUND == '#303030' ]]
+[[ $POWERLEVEL9K_DIR_BACKGROUND == '#4455aa' ]]
+[[ $POWERLEVEL9K_DIR_FOREGROUND == '#101010' ]]
+[[ $POWERLEVEL9K_VCS_CLEAN_BACKGROUND == '#55aa44' ]]
+[[ $POWERLEVEL9K_VCS_MODIFIED_BACKGROUND == '#aaaa44' ]]
+[[ $POWERLEVEL9K_PROMPT_CHAR_ERROR_VIINS_FOREGROUND == '#aa4455' ]]
+# A local palette is loaded after tracked defaults and remains authoritative on reload.
+mkdir -p "$XDG_CONFIG_HOME/p10k"
+cat > "$XDG_CONFIG_HOME/p10k/theme.local.zsh" <<'EOF'
+typeset -g POWERLEVEL9K_DIR_BACKGROUND='#123456'
+typeset -g POWERLEVEL9K_VIRTUALENV_BACKGROUND='#654321'
+EOF
+source "$HOME/.p10k.zsh"
+[[ $POWERLEVEL9K_DIR_BACKGROUND == '#123456' ]]
+[[ $POWERLEVEL9K_VIRTUALENV_BACKGROUND == '#654321' ]]
+simulated=dark
+source "$HOME/.p10k.zsh"
+[[ $POWERLEVEL9K_DIR_BACKGROUND == '#123456' ]]
+[[ $POWERLEVEL9K_VIRTUALENV_BACKGROUND == '#654321' ]]
 print 'p10k appearance integration tests passed'

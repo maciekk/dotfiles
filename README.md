@@ -28,7 +28,7 @@ config defaults.
 | Ghostty | macOS appearance, native switching | Catppuccin Latte / Catppuccin Frappe | `ghostty/dot-config/ghostty/config.ghostty` |
 | tmux | macOS appearance, checked every 15 seconds while attached | Catppuccin Latte / Catppuccin Mocha | `tmux/dot-config/tmux/appearance.sh` and `theme-*.conf` |
 | pi | Terminal appearance (following Ghostty) | Built-in `light` / `dark` | `pi-config/dot-pi/agent/settings.json` and live `~/.pi/agent/settings.json` |
-| Powerlevel10k | macOS appearance; tmux's selected mode when inside tmux | Latte / Frappe neutral surfaces; Frappe pastel accents in both | `zsh/dot-config/zsh/appearance.zsh` and `zsh/dot-p10k.zsh` |
+| Powerlevel10k | Current Omarchy theme on Omarchy; macOS/tmux appearance elsewhere | Omarchy semantic palette or Latte/Frappe fallback | `zsh/dot-config/zsh/appearance.zsh` and `zsh/dot-p10k.zsh` |
 
 **Ghostty:** the effective setting on this Mac is:
 
@@ -71,13 +71,12 @@ not linked to the tracked package, and `/reload` does not install or link
 repository files. See [pi-config/README.md](pi-config/README.md) for
 installation instructions.
 
-**Powerlevel10k:** the shell checks appearance before the first prompt and then
-at most every 15 seconds before a new prompt. In tmux it adopts tmux's current
-selection, including tmux's manual override. Neutral surfaces use Latte in light
-mode and Frappe in dark mode;
-coloured segments use soft Frappe pastel accents with dark text in both modes.
-The generated configuration's remaining ANSI colours continue to come from
-the terminal theme.
+**Powerlevel10k:** on Omarchy, the prompt reads the resolved semantic colors
+from the current theme, including legacy themes whose palette only defines ANSI
+colors. It checks the Omarchy theme name at most every 15 seconds before a new
+prompt and reloads when it changes. On other systems it follows macOS appearance
+or tmux's selected mode, using Latte/Frappe neutral surfaces and soft Frappe
+pastel accents.
 
 Run in zsh to pin the prompt independently or restore automatic behaviour:
 
@@ -87,8 +86,17 @@ p10k-theme dark
 p10k-theme auto
 ```
 
-The selection lives in ignored `~/.config/p10k/theme-mode.local`. Open a new
-shell (or `source ~/.zshrc`) after installing the `zsh` package.
+The selection lives in ignored `~/.config/p10k/theme-mode.local`. For local
+palette changes, put Powerlevel10k assignments in
+`~/.config/p10k/theme.local.zsh`; it is loaded after the tracked palette on
+startup and every appearance reload, so repository updates cannot override it.
+For example:
+
+```zsh
+typeset -g POWERLEVEL9K_DIR_BACKGROUND='#123456'
+```
+
+Open a new shell (or `source ~/.zshrc`) after installing the `zsh` package.
 
 ### Adding another themed tool
 
