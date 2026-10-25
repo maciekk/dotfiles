@@ -37,7 +37,7 @@ _p10k_appearance_select() {
 }
 
 p10k_appearance_check() {
-  zmodload -F zsh/datetime b:EPOCHSECONDS 2>/dev/null || return
+  zmodload -F zsh/datetime p:EPOCHSECONDS 2>/dev/null || return
   local -i now=$EPOCHSECONDS
   (( now - _p10k_appearance_last_check >= 15 )) || return
   _p10k_appearance_last_check=$now

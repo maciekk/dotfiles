@@ -1824,20 +1824,20 @@
 
   # Palette selected by ~/.config/zsh/appearance.zsh. Keep this close to the reload below so
   # it overrides the wizard's static rainbow values. The terminal still supplies its ANSI palette;
-  # these true-color values make the prompt's opaque segments match Ghostty's Catppuccin themes.
+  # neutral surfaces follow appearance; Frappe pastel accents stay soft in both modes.
   if [[ $P10K_APPEARANCE == light ]]; then
-    local p10k_base='#eff1f5' p10k_text='#4c4f69' p10k_surface='#ccd0da'
-    local p10k_blue='#1e66f5' p10k_green='#40a02b' p10k_yellow='#df8e1d' p10k_red='#d20f39'
+    local p10k_text='#4c4f69' p10k_surface='#ccd0da'
   else
-    local p10k_base='#303446' p10k_text='#c6d0f5' p10k_surface='#414559'
-    local p10k_blue='#8caaee' p10k_green='#a6d189' p10k_yellow='#e5c890' p10k_red='#e78284'
+    local p10k_text='#c6d0f5' p10k_surface='#414559'
   fi
+  local p10k_ink='#303446'
+  local p10k_blue='#8caaee' p10k_green='#a6d189' p10k_yellow='#e5c890' p10k_red='#e78284'
   typeset -g POWERLEVEL9K_OS_ICON_FOREGROUND=$p10k_text
   typeset -g POWERLEVEL9K_OS_ICON_BACKGROUND=$p10k_surface
   typeset -g POWERLEVEL9K_DIR_BACKGROUND=$p10k_blue
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND=$p10k_base
-  typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND=$p10k_base
-  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=$p10k_base
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=$p10k_ink
+  typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND=$p10k_ink
+  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=$p10k_ink
   typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=$p10k_green
   typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=$p10k_red
   typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND=$p10k_green
@@ -1850,9 +1850,9 @@
   typeset -g POWERLEVEL9K_STATUS_ERROR_FOREGROUND=$p10k_yellow
   typeset -g POWERLEVEL9K_STATUS_ERROR_SIGNAL_FOREGROUND=$p10k_yellow
   typeset -g POWERLEVEL9K_STATUS_ERROR_PIPE_FOREGROUND=$p10k_yellow
-  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=$p10k_base
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=$p10k_ink
   typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_BACKGROUND=$p10k_yellow
-  typeset -g POWERLEVEL9K_VIRTUALENV_FOREGROUND=$p10k_base
+  typeset -g POWERLEVEL9K_VIRTUALENV_FOREGROUND=$p10k_ink
   typeset -g POWERLEVEL9K_VIRTUALENV_BACKGROUND=$p10k_blue
 
   # Hot reload allows you to change POWERLEVEL9K options after Powerlevel10k has been initialized.

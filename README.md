@@ -28,7 +28,7 @@ config defaults.
 | Ghostty | macOS appearance, native switching | Catppuccin Latte / Catppuccin Frappe | `ghostty/dot-config/ghostty/config.ghostty` |
 | tmux | macOS appearance, checked every 15 seconds while attached | Catppuccin Latte / Catppuccin Mocha | `tmux/dot-config/tmux/appearance.sh` and `theme-*.conf` |
 | pi | Terminal appearance (following Ghostty) | Built-in `light` / `dark` | `pi-config/dot-pi/agent/settings.json` and live `~/.pi/agent/settings.json` |
-| Powerlevel10k | macOS appearance; tmux's selected mode when inside tmux | Catppuccin Latte / Frappe prompt palette | `zsh/dot-config/zsh/appearance.zsh` and `zsh/dot-p10k.zsh` |
+| Powerlevel10k | macOS appearance; tmux's selected mode when inside tmux | Latte / Frappe neutral surfaces; Frappe pastel accents in both | `zsh/dot-config/zsh/appearance.zsh` and `zsh/dot-p10k.zsh` |
 
 **Ghostty:** the effective setting on this Mac is:
 
@@ -73,9 +73,11 @@ installation instructions.
 
 **Powerlevel10k:** the shell checks appearance before the first prompt and then
 at most every 15 seconds before a new prompt. In tmux it adopts tmux's current
-selection, including tmux's manual override. It uses a Latte palette in light
-mode and Frappe in dark mode; the generated configuration's remaining ANSI
-colours continue to come from the terminal theme.
+selection, including tmux's manual override. Neutral surfaces use Latte in light
+mode and Frappe in dark mode;
+coloured segments use soft Frappe pastel accents with dark text in both modes.
+The generated configuration's remaining ANSI colours continue to come from
+the terminal theme.
 
 Run in zsh to pin the prompt independently or restore automatic behaviour:
 
