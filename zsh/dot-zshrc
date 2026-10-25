@@ -156,6 +156,8 @@ alias ls="ls -p"
 # To customize prompt, run `p10k configure` or edit ~/dotfiles/.p10k.zsh.
 #[[ ! -f ~/dotfiles/.p10k.zsh ]] || source ~/dotfiles/.p10k.zsh
 [[ ! -r ~/.config/zsh/appearance.zsh ]] || source ~/.config/zsh/appearance.zsh
+# Local-only repository: exclude from publication-status monitoring.
+export REPOS_EXCLUDE="$HOME/src/demos"
 [[ ! -r ~/.config/zsh/repo-status.zsh ]] || source ~/.config/zsh/repo-status.zsh
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 if (( $+functions[p10k_appearance_check] )); then
