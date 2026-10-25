@@ -18,6 +18,9 @@ cursor-style = block
 
 # Behavior
 mouse-hide-while-typing = true
+# Forward wheel/mouse events while tmux requests them (`set -g mouse on`), so
+# wheel-up enters tmux copy-mode instead of using Ghostty's native scrollback.
+mouse-reporting = true
 scrollback-limit = 90000
 copy-on-select = true
 
