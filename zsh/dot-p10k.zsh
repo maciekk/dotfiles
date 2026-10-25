@@ -1852,6 +1852,8 @@
   typeset -g POWERLEVEL9K_STATUS_ERROR_PIPE_FOREGROUND=$p10k_yellow
   typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=$p10k_base
   typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_BACKGROUND=$p10k_yellow
+  typeset -g POWERLEVEL9K_VIRTUALENV_FOREGROUND=$p10k_base
+  typeset -g POWERLEVEL9K_VIRTUALENV_BACKGROUND=$p10k_blue
 
   # Hot reload allows you to change POWERLEVEL9K options after Powerlevel10k has been initialized.
   # For example, you can type POWERLEVEL9K_BACKGROUND=red and see your prompt turn red. Hot reload
