@@ -4,5 +4,11 @@
   "app.session.toggleNamedFilter": [],
   "app.model.select": [],
   "app.model.cycleForward": [],
-  "app.model.cycleBackward": []
+  "app.model.cycleBackward": [],
+  "tui.altScreen.pageUp": ["ctrl+b"],
+  "tui.altScreen.pageDown": ["ctrl+f"],
+  "tui.altScreen.halfPageUp": ["ctrl+u"],
+  "tui.altScreen.halfPageDown": ["ctrl+d"],
+  "tui.altScreen.bottom": ["ctrl+shift+g"],
+  "app.exit": []
 }
