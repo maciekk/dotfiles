@@ -140,19 +140,20 @@ export default function (pi: ExtensionAPI) {
 							key,
 							text:
 								key === "usage"
-									? text.replace(/^codex\s+/i, "").replace(/(\d+%)\s+(5h|wk)\b/gi, "$2 $1")
+									? text.replace(/^codex\s+/i, "").replace(/(\d+%)\s+(5h|wk)\b/gi, "$2↓$1")
 									: text,
 						}));
 					const statusPlain = statusParts.map(({ text }) => text).join(" ");
 					const styledStatus = statusParts
 						.map(({ text }) =>
 							text
-								.split(/(\d+%)/g)
+								.split(/(↓?\d+%)/g)
 								.map((part) => {
-									const percent = /^(\d+)%$/.exec(part);
+									const percent = /^(↓?)(\d+)%$/.exec(part);
 									if (!percent) return theme.fg("dim", part);
-									const value = Number(percent[1]);
-									const color = value > 90 ? "error" : value > 70 ? "warning" : "success";
+									const value = Number(percent[2]);
+									const used = percent[1] === "↓" ? 100 - value : value;
+									const color = used > 90 ? "error" : used > 70 ? "warning" : "success";
 									return theme.bold(theme.fg(color, part));
 								})
 								.join(""),

@@ -1,2 +1,4 @@
 plugins/
 theme.local.conf
+
+theme-mode.local
