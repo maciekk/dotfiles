@@ -26,7 +26,7 @@ stow -D -t $HOME --dotfiles pi-config
 - `.pi/agent/settings.json`
   - enables `@narumitw/pi-usage` and the web-search package
   - uses fullscreen TUI mode so the mouse wheel always scrolls the transcript
-  - follows terminal appearance with `"theme": "light/dark"` (restart pi after changing this setting externally)
+  - follows terminal appearance with `"theme": "light/dark"` (restart pi after changing this setting externally); the shared zsh config overrides this per invocation with Omarchy's generated theme when available
 - `.pi/agent/keybindings.json`
   - maps `Ctrl-P` / `Ctrl-N` to cursor-up / cursor-down and disables conflicting shortcuts
 - `.pi/agent/pi-usage.json`

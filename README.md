@@ -27,7 +27,7 @@ config defaults.
 | --- | --- | --- | --- |
 | Ghostty | macOS appearance, native switching | Catppuccin Latte / Catppuccin Frappe | `ghostty/dot-config/ghostty/config.ghostty` |
 | tmux | macOS appearance, checked every 15 seconds while attached | Catppuccin Latte / Catppuccin Mocha | `tmux/dot-config/tmux/appearance.sh` and `theme-*.conf` |
-| pi | Terminal appearance (following Ghostty) | Built-in `light` / `dark` | `pi-config/dot-pi/agent/settings.json` and live `~/.pi/agent/settings.json` |
+| pi | Omarchy palette when available; terminal appearance elsewhere | Omarchy-generated theme / built-in `light` and `dark` | `pi-config/dot-pi/agent/settings.json` and conditional alias in `zsh/dot-zshrc` |
 | Powerlevel10k | Current Omarchy theme on Omarchy; macOS/tmux appearance elsewhere | Omarchy semantic palette or Latte/Frappe fallback | `zsh/dot-config/zsh/appearance.zsh` and `zsh/dot-p10k.zsh` |
 
 **Ghostty:** the effective setting on this Mac is:
@@ -59,15 +59,21 @@ The selection lives in ignored `~/.config/tmux/theme-mode.local`. An existing
 `theme.local.conf` takes precedence over these modes; remove that file to use
 auto switching. See [tmux/README.md](tmux/README.md) for details.
 
-**pi:** both the tracked and live settings select `"theme": "light/dark"`.
-This switches pi's own UI palette with terminal appearance, not just its
-inherited background. Restart pi after editing the saved setting externally.
-For an explicit per-run override, use `pi --use-theme light/dark` (auto),
-`pi --use-theme light`, or `pi --use-theme dark`; CLI overrides do not change
-the saved preference. Use `/settings` for interactive theme selection.
+**pi:** the tracked setting selects `"theme": "light/dark"`, which switches
+pi's own UI palette with terminal appearance on macOS. On an Omarchy system,
+the shared zsh config detects Omarchy and its generated `omarchy-system` theme,
+then aliases `pi` to `pi --use-theme omarchy-system`. The command-line override
+wins without rewriting the stowed `settings.json`, so the Mac keeps its own
+automatic light/dark behavior. Omarchy refreshes the generated theme whenever
+its system theme changes.
 
-Verify the loaded config before changing it: this Mac's live pi config is
-not linked to the tracked package, and `/reload` does not install or link
+For an explicit per-run override, use `command pi --use-theme light/dark`
+(auto), `command pi --use-theme light`, or `command pi --use-theme dark`;
+`command` bypasses the Omarchy zsh alias and CLI overrides do not change the
+saved preference. Use `/settings` only for shared preferences: changing the
+theme there writes the shared stowed file when it is linked.
+
+Verify the loaded config before changing it: `/reload` does not install or link
 repository files. See [pi-config/README.md](pi-config/README.md) for
 installation instructions.
 

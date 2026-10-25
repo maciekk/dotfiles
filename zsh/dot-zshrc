@@ -149,6 +149,14 @@ alias v='NVIM_APPNAME=nvim-maciek nvim'
 
 alias llm=/Applications/Ollama.app/Contents/MacOS/Ollama
 
+# Keep the shared Pi setting suitable for macOS, but use Omarchy's generated
+# palette when this machine provides it. --use-theme overrides settings.json
+# for this invocation without rewriting the stowed file.
+if (( $+commands[omarchy-theme-current] )) &&
+   [[ -r "$HOME/.pi/agent/themes/omarchy-system.json" ]]; then
+  alias pi='pi --use-theme omarchy-system'
+fi
+
 alias ls="ls -p"
 
 # To install p10k, run:
