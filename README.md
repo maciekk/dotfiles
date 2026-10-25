@@ -168,7 +168,29 @@ visibility and does not replace the current-directory Git segment.
 ```sh
 repos status   # cached per-repo details, local scan ages, and summary
 repos refresh  # synchronous local rescan; also fetches if the fetch interval is due
+repos pull dotfiles gemini-slurp  # explicit, clean-working-tree, fast-forward-only pulls
 ```
+
+`repos pull REPO [REPO ...]` resolves unique directory names against freshly
+discovered repositories, or accepts absolute paths to those repositories.
+`dotfiles` also names the configured dotfiles checkout. Ambiguous names are
+rejected with matching paths listed; exclusions apply to pull discovery too.
+Quote names/paths containing spaces. No arguments means usage, **not pull all**.
+
+Only the checked-out branch is pulled, unlike the indicator's all-branch scan.
+Dirty repositories (including untracked files), detached HEADs, branches without
+an available upstream, and repositories with an in-progress Git operation are
+skipped. Pulls use `--ff-only --no-rebase --no-autostash`, overriding autostash
+preferences: no automatic stash, merge commit, rebase, or force operation.
+Divergence or network/authentication errors fail that pull without stopping the
+remaining requested repositories. Explicit pulls use Git's normal credentials
+and may prompt. Repeated arguments resolving to the same repo are deduplicated.
+
+The final summary counts completed pulls (including already-up-to-date repos),
+skips, and failures. Exit status is 0 only if all requested repositories were
+pulled successfully, 1 for any skip/failure, and 2 for missing arguments.
+The indicator catches up on its normal background scan intervals; `repos refresh`
+requests an immediate rescan.
 
 No cron or daemon: a pre-prompt hook reads cached data and launches a detached
 worker when due. Dotfiles is checked every 15 seconds, other repos every 60
@@ -207,5 +229,6 @@ Tests (temporary repositories, no network):
 
 ```sh
 zsh scripts/tests/repo-status.zsh
+zsh scripts/tests/repos-pull.zsh
 zsh scripts/tests/p10k-appearance.zsh
 ```

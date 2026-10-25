@@ -1,5 +1,5 @@
 # Local repository publication indicator for Powerlevel10k.
-# Also executable: zsh repo-status.zsh {status|refresh|worker}
+# Also executable: zsh repo-status.zsh {status|refresh|pull REPO...|worker}
 
 zmodload zsh/datetime
 zmodload zsh/system
@@ -218,10 +218,96 @@ prompt_repo_status() {
   [[ -n $_repos_text ]] && p10k segment -b '#f2d5cf' -f '#303446' -t "$_repos_text"
 }
 
+_repos_pull() {
+  emulate -L zsh
+  if (( ! $# )); then
+    print -u2 'Usage: repos pull REPO [REPO ...] (unique names or absolute paths)'
+    return 2
+  fi
+  local repo arg group branch dirty operation operation_path
+  local -a candidates matches
+  local -A seen
+  local -i pulled=0 skipped=0 failed=0 busy=0
+  for group in dot src; do
+    while IFS= read -r -d '' repo; do
+      candidates+=("${repo:A}")
+    done < <(_repos_candidates "$group")
+  done
+  candidates=("${(@u)candidates}")
+  for arg in "$@"; do
+    matches=()
+    for repo in "${candidates[@]}"; do
+      if [[ $arg == /* ]]; then
+        [[ ${arg:A} == $repo ]] && matches+=("$repo")
+      elif [[ $arg == ${repo:t} || ( $arg == dotfiles && $repo == ${REPOS_DOTFILES:A} ) ]]; then
+        matches+=("$repo")
+      fi
+    done
+    if (( ${#matches} != 1 )); then
+      if (( ${#matches} )); then
+        print -r -- "FAIL $arg: ambiguous name; use an absolute path:"
+        printf '  %s\n' "${matches[@]}"
+      else
+        print -r -- "FAIL $arg: not a discovered repository"
+      fi
+      (( ++failed ))
+      continue
+    fi
+    repo=$matches[1]
+    [[ -n ${seen[$repo]:-} ]] && continue
+    seen[$repo]=1
+    if [[ $(git -C "$repo" rev-parse --show-toplevel 2>/dev/null) != $repo ]]; then
+      print -r -- "FAIL $repo: not a working-tree root"
+      (( ++failed )); continue
+    fi
+    branch=$(git -C "$repo" symbolic-ref -q --short HEAD) || {
+      print -r -- "SKIP $repo: detached HEAD"
+      (( ++skipped )); continue
+    }
+    if ! git -C "$repo" rev-parse --verify '@{upstream}' >/dev/null 2>&1; then
+      print -r -- "SKIP $repo: $branch has no available upstream"
+      (( ++skipped )); continue
+    fi
+    dirty=$(git --no-optional-locks -C "$repo" status --porcelain --untracked-files=normal) || {
+      print -r -- "FAIL $repo: cannot inspect working tree"
+      (( ++failed )); continue
+    }
+    if [[ -n $dirty ]]; then
+      print -r -- "SKIP $repo: uncommitted changes (including untracked files)"
+      (( ++skipped )); continue
+    fi
+    busy=0
+    for operation in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD rebase-merge rebase-apply sequencer BISECT_LOG; do
+      operation_path=$(git -C "$repo" rev-parse --path-format=absolute --git-path "$operation")
+      [[ -e $operation_path ]] && busy=1
+    done
+    if (( busy )); then
+      print -r -- "SKIP $repo: Git operation in progress"
+      (( ++skipped )); continue
+    fi
+    print -r -- "PULL $repo ($branch)"
+    # Override local autostash/rebase preferences: never hide changes or rewrite
+    # commits just to reconcile a repository. Git itself rejects divergence.
+    if git -C "$repo" -c rebase.autoStash=false -c merge.autoStash=false \
+        -c pull.autostash=false pull --ff-only --no-rebase --no-autostash; then
+      (( ++pulled ))
+    else
+      print -r -- "FAIL $repo: pull failed; no automatic reconciliation attempted"
+      (( ++failed ))
+    fi
+  done
+  print -r -- "Summary: $pulled pulled, $skipped skipped, $failed failed"
+  (( skipped == 0 && failed == 0 ))
+}
+
 repos() {
   emulate -L zsh
   local group stamp flags repo
   case ${1:-status} in
+    pull)
+      shift
+      _repos_pull "$@"
+      ;;
     refresh)
       _repos_worker force || return
       _repos_read
@@ -243,7 +329,7 @@ repos() {
       _repos_read
       print -r -- "Summary: ${_repos_text:-clean}"
       ;;
-    *) print -u2 'Usage: repos [status|refresh]'; return 2 ;;
+    *) print -u2 'Usage: repos [status|refresh|pull REPO ...]'; return 2 ;;
   esac
 }
 
