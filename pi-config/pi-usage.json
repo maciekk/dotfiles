@@ -1,1 +1,7 @@
-{}
+{
+  "statuslineDisplay": {
+    "template": "{windows}",
+    "countdown": "{value} ↻{reset}",
+    "separator": " | "
+  }
+}

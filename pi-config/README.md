@@ -22,7 +22,7 @@ stow -D -t "$HOME" --dotfiles --ignore='^pi-usage\.json$' pi-config
 
 - `.pi/agent/extensions/statusline.ts`
   - stable, compact one-line token stats, context bar, Git counts, activity spinner, model, and thinking level
-  - displays extension status items unchanged, including the quota text and reset countdowns produced by `pi-usage`
+  - emphasizes remaining quota percentages from `pi-usage`; values at or below 30% are yellow and values at or below 10% are red
 - `.pi/agent/settings.json`
   - enables `@narumitw/pi-usage` and the web-search package
   - uses fullscreen TUI mode so the mouse wheel always scrolls the transcript
@@ -31,7 +31,7 @@ stow -D -t "$HOME" --dotfiles --ignore='^pi-usage\.json$' pi-config
   - maps `Ctrl-P` / `Ctrl-N` to cursor-up / cursor-down and disables conflicting shortcuts
 - `pi-usage.json`
   - tracked canonical configuration for `@narumitw/pi-usage`
-  - currently keeps package defaults, including remaining percentages and reset countdowns
+  - keeps remaining percentages and reset countdowns while dropping redundant provider/window labels, for example `82% ↻4h59m | 96% ↻6d23h`
   - deployed as the private regular file `~/.pi/agent/pi-usage.json`, because the extension rejects symlinks
 
 ## Changing pi-usage settings

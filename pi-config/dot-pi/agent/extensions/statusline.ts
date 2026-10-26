@@ -136,9 +136,26 @@ export default function (pi: ExtensionAPI) {
 
 					const statusParts = [...footerData.getExtensionStatuses().entries()]
 						.sort(([a], [b]) => a.localeCompare(b))
-						.map(([, text]) => text);
-					const statusPlain = statusParts.join(" ");
-					const styledStatus = statusParts.map((text) => theme.fg("dim", text)).join(" ");
+						.map(([key, text]) => ({ key, text }));
+					const statusPlain = statusParts.map(({ text }) => text).join(" ");
+					const styledStatus = statusParts
+						.map(({ key, text }) => {
+							if (key !== "usage") return theme.fg("dim", text);
+							return text
+								.split(/(\d+(?:\.\d+)?%|↻|·)/gu)
+								.map((part) => {
+									const percent = /^(\d+(?:\.\d+)?)%$/u.exec(part);
+									if (percent) {
+										const remaining = Number(percent[1]);
+										const color = remaining <= 10 ? "error" : remaining <= 30 ? "warning" : "text";
+										return theme.bold(theme.fg(color, part));
+									}
+									if (part === "↻") return theme.fg("muted", part);
+									return theme.fg("dim", part);
+								})
+								.join("");
+						})
+						.join(" ");
 
 					const activityPlain = isWorking ? `${spinnerFrames[spinnerIndex]} ` : "";
 					const activity = isWorking ? `${theme.fg("accent", spinnerFrames[spinnerIndex])} ` : "";
