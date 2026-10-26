@@ -1,3 +1,6 @@
 *.un~
 *.DS_Store
 *~
+
+# pi-usage needs a mutable regular file; keep its tracked source outside the Stow tree.
+/pi-config/dot-pi/agent/pi-usage.json

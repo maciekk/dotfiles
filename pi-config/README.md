@@ -10,27 +10,38 @@ From repo root:
 ./do-stow.sh pi-config
 ```
 
-The wrapper handles `pi-usage.json` specially because that extension rejects symbolic links.
+The wrapper Stows ordinary Pi configuration and copies the tracked `pi-usage.json` into place as a regular file, because that extension rejects symbolic links.
 
 ## Uninstall
 
 ```bash
-stow -D -t $HOME --dotfiles pi-config
+stow -D -t "$HOME" --dotfiles --ignore='^pi-usage\.json$' pi-config
 ```
 
 ## Included
 
 - `.pi/agent/extensions/statusline.ts`
   - stable, compact one-line token stats, context bar, Git counts, activity spinner, model, and thinking level
-  - displays Codex 5-hour and weekly **remaining** budgets from the `pi-usage` status item; `↓` indicates quota counting down (e.g. `5h↓90% wk↓75%`)
+  - displays extension status items unchanged, including the quota text and reset countdowns produced by `pi-usage`
 - `.pi/agent/settings.json`
   - enables `@narumitw/pi-usage` and the web-search package
   - uses fullscreen TUI mode so the mouse wheel always scrolls the transcript
   - follows terminal appearance with `"theme": "light/dark"` (restart pi after changing this setting externally); the shared zsh config overrides this per invocation with Omarchy's generated theme when available
 - `.pi/agent/keybindings.json`
   - maps `Ctrl-P` / `Ctrl-N` to cursor-up / cursor-down and disables conflicting shortcuts
-- `.pi/agent/pi-usage.json`
-  - reserves a settings file for `pi-usage`; the installed extension reports remaining percentages (it does not support `codexStatusPercentage`)
-  - installed as a regular private file because `pi-usage` rejects symbolic links
+- `pi-usage.json`
+  - tracked canonical configuration for `@narumitw/pi-usage`
+  - currently keeps package defaults, including remaining percentages and reset countdowns
+  - deployed as the private regular file `~/.pi/agent/pi-usage.json`, because the extension rejects symlinks
 
-After installing/updating, run `/reload` inside pi. Use `./do-stow.sh pi-config` rather than invoking Stow directly so `pi-usage.json` is copied correctly.
+## Changing pi-usage settings
+
+`pi-config/pi-usage.json` is the source of truth shared by all machines. Edit that tracked file whenever a setting should persist, then deploy the whole Pi configuration normally:
+
+```bash
+./do-stow.sh pi-config
+```
+
+Settings changed through `/usage` or `/fast` modify only the live file and are therefore temporary; the next deployment restores the tracked configuration. The obsolete Stow-tree path `.pi/agent/pi-usage.json` is ignored to avoid creating a second tracked source.
+
+After deploying settings, run `/reload` inside Pi.

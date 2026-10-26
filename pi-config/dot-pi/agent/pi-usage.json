@@ -1,5 +1,0 @@
-{
-  "statuslineDisplay": {
-    "template": "{provider} -- {windows}"
-  }
-}
