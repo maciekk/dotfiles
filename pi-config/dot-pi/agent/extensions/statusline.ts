@@ -147,8 +147,9 @@ export default function (pi: ExtensionAPI) {
 									const percent = /^(\d+(?:\.\d+)?)%$/u.exec(part);
 									if (percent) {
 										const remaining = Number(percent[1]);
-										const color = remaining <= 10 ? "error" : remaining <= 30 ? "warning" : "text";
-										return theme.bold(theme.fg(color, part));
+										if (remaining <= 15) return theme.bold(theme.fg("error", part));
+										if (remaining <= 30) return theme.fg("warning", part);
+										return theme.fg("dim", part);
 									}
 									if (part === "↻") return theme.fg("muted", part);
 									return theme.fg("dim", part);

@@ -22,7 +22,7 @@ stow -D -t "$HOME" --dotfiles --ignore='^pi-usage\.json$' pi-config
 
 - `.pi/agent/extensions/statusline.ts`
   - stable, compact one-line token stats, context bar, Git counts, activity spinner, model, and thinking level
-  - emphasizes remaining quota percentages from `pi-usage`; values at or below 30% are yellow and values at or below 10% are red
+  - emphasizes remaining quota percentages from `pi-usage`; values above 30% stay neutral/dim, values above 15% and at or below 30% use warning colour without bold, and values at or below 15% use bold error colour
 - `.pi/agent/settings.json`
   - enables `@narumitw/pi-usage` and the web-search package
   - uses fullscreen TUI mode so the mouse wheel always scrolls the transcript
