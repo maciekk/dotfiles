@@ -10,5 +10,7 @@
   "tui.altScreen.halfPageUp": ["ctrl+u"],
   "tui.altScreen.halfPageDown": ["ctrl+d"],
   "tui.altScreen.bottom": ["ctrl+shift+g"],
-  "app.exit": []
+  "app.exit": [],
+  "app.message.followUp": "enter",
+  "tui.input.submit": "alt+enter"
 }
