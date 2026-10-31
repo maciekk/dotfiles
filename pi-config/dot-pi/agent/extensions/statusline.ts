@@ -88,7 +88,6 @@ export default function (pi: ExtensionAPI) {
 				render(width: number): string[] {
 					let input = 0;
 					let output = 0;
-					let cost = 0;
 					let latestCacheHitRate = 0;
 
 					for (const entry of ctx.sessionManager.getBranch()) {
@@ -96,7 +95,6 @@ export default function (pi: ExtensionAPI) {
 							const message = entry.message as AssistantMessage;
 							input += message.usage.input;
 							output += message.usage.output;
-							cost += message.usage.cost.total;
 							const promptTokens = message.usage.input + message.usage.cacheRead + message.usage.cacheWrite;
 							latestCacheHitRate = promptTokens > 0 ? (message.usage.cacheRead / promptTokens) * 100 : 0;
 						}
@@ -124,12 +122,11 @@ export default function (pi: ExtensionAPI) {
 					const styledContext = `${theme.fg("dim", "ctx ")}${theme.bg("customMessageBg", theme.fg("muted", "█".repeat(contextFilled)))}${theme.bg("customMessageBg", theme.fg("dim", "░".repeat(contextBarWidth - contextFilled)))}`;
 
 					const cacheRate = `${latestCacheHitRate.toFixed(1)}%`;
-					const usageParts = [`↑${formatTokens(input)}`, `↓${formatTokens(output)}`, `CH${cacheRate}`, `$${cost.toFixed(2)}`];
+					const usageParts = [`↑${formatTokens(input)}`, `↓${formatTokens(output)}`, `CH${cacheRate}`];
 					const styledUsageParts = [
 						`${theme.fg("dim", "↑")}${theme.bold(formatTokens(input))}`,
 						`${theme.fg("dim", "↓")}${theme.bold(formatTokens(output))}`,
 						`${theme.fg("dim", "CH")}${theme.bold(cacheRate)}`,
-						`${theme.fg("dim", "$")}${theme.bold(cost.toFixed(2))}`,
 					];
 					const usageText = usageParts.join(" ");
 					const styledUsage = styledUsageParts.join(" ");
