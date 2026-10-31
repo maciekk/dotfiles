@@ -3,7 +3,6 @@
   "defaultProvider": "openai-codex",
   "hideThinkingBlock": true,
   "packages": [
-    "npm:@ollama/pi-web-search",
     "npm:@narumitw/pi-usage"
   ],
   "terminal": {
