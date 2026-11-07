@@ -8,9 +8,13 @@ Or, more conveniently:
 
 ## AeroSpace (macOS)
 
-`aerospace/dot-aerospace.toml` is an unchanged copy of the default template
-bundled with AeroSpace 0.21.3-Beta at
+`aerospace/dot-aerospace.toml` is based on the default template bundled with
+AeroSpace 0.21.3-Beta at
 `/Applications/AeroSpace.app/Contents/Resources/default-config.toml`.
+Workspaces are limited to 1–9 and 0: Alt-number switches workspace and
+Alt-Shift-number moves a window there. Letter-based workspace bindings are
+removed; Alt-f toggles AeroSpace fullscreen. The default h/j/k/l focus and
+movement bindings remain.
 
 Install the symlink at `~/.aerospace.toml`:
 
