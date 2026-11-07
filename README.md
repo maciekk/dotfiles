@@ -18,6 +18,11 @@ AeroSpace fullscreen; Alt-m minimizes the focused window using native macOS
 minimization. Restore minimized windows from the Dock or the app's Window menu.
 The default h/j/k/l focus and movement bindings remain.
 
+`1-plan` is pinned to `LEN T32p-20` when connected, with `built-in` as its
+undocked fallback. The remaining workspaces are unpinned. Extend
+`[workspace-to-monitor-force-assignment]` to give other workspaces a preferred
+monitor; these preferences match monitor names, not dynamically measured size.
+
 Install the symlink at `~/.aerospace.toml`:
 
 ```sh

@@ -84,6 +84,11 @@ gaps.outer.bottom =     0
 gaps.outer.top = [{ monitor."built-in" = 0 }, 32]
 gaps.outer.right =      0
 
+# Prefer the desk monitor for planning, falling back to the laptop undocked.
+# Other workspaces remain unpinned for now.
+[workspace-to-monitor-force-assignment]
+    1-plan = ['LEN T32p-20', 'built-in']
+
 # 'main' binding mode declaration
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 # 'main' binding mode must be always presented
