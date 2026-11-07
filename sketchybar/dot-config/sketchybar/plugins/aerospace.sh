@@ -52,7 +52,9 @@ while IFS= read -r ws; do
     changes+=(--add item "$item" left
       --set "$item" click_script="$click"
         label.font='Helvetica Neue:Medium:13.0'
-        icon.font='Helvetica Neue:Bold:13.0' background.drawing=off)
+        icon.font='Helvetica Neue:Bold:13.0'
+        background.height=22 background.corner_radius=5
+        background.color="$ACTIVE_BG" background.drawing=off)
     added=true
   fi
   labels=''
@@ -63,20 +65,25 @@ while IFS= read -r ws; do
   done <<< "$apps"
   if [[ "$ws" == "$focused" ]]; then
     fg="$ACCENT"
+    label_color="$TEXT"
+    background=on
   else
     fg="$MUTED"
+    label_color="$MUTED"
+    background=off
   fi
   label_drawing=off
   [[ -n "$labels" ]] && label_drawing=on
   if ! jq -e --arg ws "$display_name" --arg label "$labels" \
-      --arg drawing "$label_drawing" --arg fg "$fg" --arg text "$TEXT" '
+      --arg drawing "$label_drawing" --arg fg "$fg" --arg text "$label_color" \
+      --arg background "$background" '
       .geometry.drawing == "on" and .icon.value == $ws and
       .label.value == $label and .label.drawing == $drawing and
-      .geometry.background.drawing == "off" and
+      .geometry.background.drawing == $background and
       .icon.color == $fg and .label.color == $text' <<< "$current" >/dev/null; then
     changes+=(--set "$item" drawing=on icon="$display_name"
       label="$labels" label.drawing="$label_drawing"
-      background.drawing=off icon.color="$fg" label.color="$TEXT")
+      background.drawing="$background" icon.color="$fg" label.color="$label_color")
   fi
 done < <(jq -r 'sort_by(.workspace as $ws |
   ((try ($ws | capture("^(?<n>[0-9]+)(?:-|$)").n | tonumber) catch null) // null) as $n |

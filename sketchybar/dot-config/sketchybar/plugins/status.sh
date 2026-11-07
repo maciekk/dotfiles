@@ -22,7 +22,7 @@ fi
 [[ "$SENDER" == volume_change ]] && exit 0
 
 sketchybar --set clock label="$(date '+%a %d %b  %H:%M')" \
-  icon.color="$ACCENT" label.color="$TEXT"
+  icon.color="$CLOCK" label.color="$TEXT"
 battery=$(pmset -g batt)
 percent=$(grep -Eo '[0-9]+%' <<< "$battery" | head -1 | tr -d '%')
 if [[ -n "$percent" ]]; then
@@ -36,6 +36,9 @@ if [[ -n "$percent" ]]; then
   color="$TEXT"
   if [[ "$battery" == *'AC Power'* ]]; then
     icon=''
+    color="$GOOD"
+  elif (( percent <= 10 )); then
+    color="$CRITICAL"
   elif (( percent <= 20 )); then
     color="$WARNING"
   fi

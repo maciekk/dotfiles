@@ -1,7 +1,15 @@
 #!/bin/bash
-# Deliberately pinned dark: a muted charcoal dashboard, independent of macOS.
-BAR=0xff181a1c
-TEXT=0xffe6e6e6
-MUTED=0xffe6e6e6
-ACCENT=0xff69cfff
-WARNING=0xffe08b89
+# Pinned dark, with restrained cool/warm accents and semantic status colours.
+BAR=0xed181c22
+TEXT=0xffe6e9ef
+MUTED=0xff969fad
+DIM=0xff495361
+ACCENT=0xff78c8e8
+ACTIVE_BG=0xff263d49
+WARM=0xffe5bc86
+WEATHER=0xffb7a5db
+CLOCK=$ACCENT
+WIFI=0xffb8c4d2
+GOOD=0xff9bc69b
+WARNING=0xffe6bb78
+CRITICAL=0xffe18c91

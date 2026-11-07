@@ -9,11 +9,11 @@ source "$CONFIG_DIR/colors.sh"
 # AeroSpace reserves 32pt at the top on external displays; macOS already
 # reserves the notch area on the built-in display.
 sketchybar --bar position=top height=28 margin=0 y_offset=0 \
-  color="$BAR" topmost=window sticky=on show_in_fullscreen=off \
+  color="$BAR" blur_radius=18 topmost=window sticky=on show_in_fullscreen=off \
   padding_left=8 padding_right=8 shadow=off
 
 sketchybar --default \
-  icon.font='JetBrainsMono Nerd Font Mono:Regular:15.0' \
+  icon.font='Hack Nerd Font:Regular:18.0' \
   label.font='Helvetica Neue:Medium:13.0' \
   icon.color="$TEXT" label.color="$TEXT" \
   padding_left=4 padding_right=4 \
@@ -33,23 +33,55 @@ sketchybar --add item aerospace_controller left \
 
 # Visually separate workspaces from the focused window title.
 sketchybar --add item workspace_separator left \
-  --set workspace_separator icon='┃' icon.font='Helvetica Neue:Bold:17.0' \
-    icon.color="$TEXT" icon.padding_left=6 icon.padding_right=10 \
+  --set workspace_separator icon='│' icon.font='Helvetica Neue:Regular:15.0' \
+    icon.color="$DIM" icon.padding_left=5 icon.padding_right=6 \
     label.drawing=off
 
 # Keep the title out of the MacBook's central camera notch.
 sketchybar --add item front_window left \
-  --set front_window icon.drawing=off label.max_chars=55 label.color="$MUTED"
+  --set front_window icon.drawing=off label.max_chars=24 label.color="$MUTED"
 
 sketchybar --add item clock right \
-  --set clock icon='' update_freq=30 script="$PLUGIN_DIR/status.sh" \
-  --subscribe clock system_woke \
+  --set clock icon='' icon.font='Hack Nerd Font:Regular:16.0' update_freq=30 script="$PLUGIN_DIR/status.sh" \
+  --subscribe clock system_woke power_source_change \
   --add item battery right \
-  --set battery icon='' \
+  --set battery icon='' icon.font='Hack Nerd Font:Regular:20.0' \
   --add item volume right \
   --set volume icon='󰕾' \
     script="$PLUGIN_DIR/status.sh" \
     click_script='open "x-apple.systempreferences:com.apple.Sound-Settings.extension"' \
   --subscribe volume volume_change
+
+# Right items are added from the outside in: time/power | weather | telemetry.
+sketchybar --add item status_separator right \
+  --set status_separator icon='│' icon.color="$DIM" label.drawing=off \
+  --add item weather right \
+  --set weather drawing=off update_freq=900 script="$PLUGIN_DIR/weather.sh" \
+    icon.color="$WEATHER" icon.font='Hack Nerd Font:Regular:16.0' \
+    click_script='open "https://open-meteo.com/en/docs?latitude=43.4643&longitude=-80.5204"' \
+  --subscribe weather system_woke \
+  --add item network right \
+  --set network icon='↓' icon.color="$ACCENT" label='—' \
+    update_freq=5 script="$PLUGIN_DIR/network.sh" \
+    label.font='Helvetica Neue:Medium:12.0' \
+    click_script='open "x-apple.systempreferences:com.apple.wifi-settings-extension"' \
+  --subscribe network wifi_change system_woke \
+  --add item wifi right \
+  --set wifi icon='' label.drawing=off icon.color="$WIFI" \
+    icon.font='Hack Nerd Font:Regular:16.0' \
+    label.max_chars=20 label.font='Helvetica Neue:Medium:12.0' \
+    click_script='open "x-apple.systempreferences:com.apple.wifi-settings-extension"' \
+  --add item cpu right \
+  --set cpu icon='' label='—' icon.color="$MUTED" \
+    icon.font='Hack Nerd Font:Regular:16.0' \
+    update_freq=10 script="$PLUGIN_DIR/metrics.sh" \
+    click_script='open -a "Activity Monitor"' \
+  --subscribe cpu system_woke
+
+# Native metadata when supported; optional media-control for macOS 15.3+.
+sketchybar --add item now_playing left \
+  --set now_playing drawing=off icon='󰎆' icon.color="$WARM" \
+    label.max_chars=20 update_freq=10 script="$PLUGIN_DIR/media.sh" \
+  --subscribe now_playing media_change
 
 sketchybar --update

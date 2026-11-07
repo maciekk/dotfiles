@@ -48,23 +48,32 @@ no additional top gap because macOS already reserves 32pt for the notch.
 A top-mounted AeroSpace dashboard with the native menu bar set to auto-hide.
 Reveal the native bar at the top edge for application menus and Ice-managed
 status icons. SketchyBar stays above app windows but below the revealed native
-menu bar (`topmost=window`). The bar uses a pinned near-black charcoal palette,
-a compact 28pt height, and flat items without pill backgrounds. It shows:
+menu bar (`topmost=window`). The bar uses translucent charcoal with a subtle
+blur, a compact 28pt height, Helvetica Neue text, and larger Hack Nerd Font
+icons (16pt for CPU/Wi-Fi/weather/clock, 18pt otherwise, 20pt for the battery). It shows:
 
-- Occupied workspaces plus the active workspace, with clickable workspace
-  numbers (purpose suffixes are hidden) and full lowercase app names
-  (e.g. `firefox`, `ghostty`, `obsidian`). Empty inactive workspaces hide;
-  system statuses retain their Nerd Font icons.
-- Focused app/window title (truncated), volume, battery/charging, and clock.
-- Blue active-workspace number; text is 90% white (`#e6e6e6`), and low battery
-  gets a warning color.
+- Occupied workspaces plus the active workspace, with clickable numbers
+  (purpose suffixes are hidden). Common apps use compact labels: `Obsid`,
+  `Fire`, `Ghost`, `GPT`, `SMS`; other names remain lowercase. Empty inactive
+  workspaces hide. The focused workspace gets a cyan-tinted highlight;
+  inactive labels are muted.
+- Focused app/window title (truncated), volume, battery/charging, with lavender
+  weather and a light-blue clock accent. Battery colour is green on AC, amber at ≤20%, red at ≤10%.
+- CPU usage percentage: green below 25%, amber at 25–69%, red at 70%+.
+  Click to open Activity Monitor.
+- Wi-Fi name/status and live download/upload rates (`K`/`M` = KiB/MiB per
+  second) on the default-route interface. Click to open Wi-Fi settings.
+- Waterloo, Ontario weather in Celsius from [Open-Meteo](https://open-meteo.com/)
+  (no API key).
+- Now-playing title/artist, hidden while paused or unavailable. See the
+  optional helper below for modern macOS.
 
-Install dependencies (the font is already installed on this Mac):
+Install dependencies:
 
 ```sh
 brew tap FelixKratz/formulae
 brew install sketchybar jq
-brew install --cask font-jetbrains-mono-nerd-font
+brew install --cask font-hack-nerd-font
 ```
 
 Back up any existing `~/.config/sketchybar` directory before deploying:
@@ -92,17 +101,42 @@ Configuration lives in `sketchybar/dot-config/sketchybar/`:
 - `colors.sh`: pinned dark charcoal palette (independent of macOS appearance).
 - `plugins/aerospace.sh`: workspace reconciliation and window title.
 - `plugins/window-title.jq`: title formatting; strips Obsidian's vault/version
-  suffix while preserving the document name. All titles are capped at 55 chars.
-- `plugins/app-labels.sh`: full application names, converted to lowercase.
-- `plugins/status.sh`: volume, battery, and clock. Click volume to open Sound
-  settings.
+  suffix while preserving the document name. The bar displays at most 24 chars.
+- `plugins/app-labels.sh`: app abbreviations, with lowercase fallback.
+- `plugins/status.sh`: volume, battery, and clock. Click volume for Sound settings.
+- `plugins/metrics.sh`: CPU sampling.
+- `plugins/network.sh`: byte-counter deltas and Wi-Fi status/name. State lives in
+  `${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles-sketchybar/`; SSIDs are not stored.
+- `plugins/weather.sh`: Waterloo weather, with bounded request timeouts and an
+  unavailable marker on failure. Uses Open-Meteo's forecast API.
+- `plugins/media.sh`: native media metadata or optional `media-control`.
+
+**Wi-Fi privacy:** recent macOS versions redact the SSID unless the querying
+process has appropriate Location access. On this Mac the system currently
+returns `<redacted>`; the bar shows only the connection icon when the name
+is unavailable, not a redundant `Wi-Fi` label or a false disconnected state.
+It displays the actual name automatically when available. No sudo, permission bypass, or background Location helper is used.
+An exact SSID on restricted macOS needs a separately Location-authorized helper.
+
+**Optional now-playing support:** macOS 15.3+ restricts the private API used by
+SketchyBar's native `media_change` event. For system-wide metadata on modern
+macOS, install `brew install media-control`, then `sketchybar --update`.
+The configuration uses it automatically when installed; without it, native
+media events remain supported but the item may stay hidden. No media apps are
+launched and no AppleScript Automation permission is needed.
+
+Run fixture tests with `bash sketchybar/tests/status.sh`.
 
 Workspace switches update immediately through AeroSpace's
 `exec-on-workspace-change` callback. App lists/window titles refresh every five
 seconds, with extra updates when the front app changes. Unchanged workspace
 polls are read-only; actual changes are batched, and items are only reordered
-when new ones are added to avoid flicker. Status refreshes every 30 seconds, and volume also reacts to volume-change events. Named workspaces
-are discovered automatically; numeric keyboard bindings are unchanged. No
+when new ones are added to avoid flicker. Clock/battery refresh every 30 seconds;
+volume and power changes also trigger updates. CPU refreshes every 10s,
+network rates every 5s, Wi-Fi identity every 30s (also on Wi-Fi changes), weather
+every 15 minutes, and optional media every 10s plus native events. Network
+samples reset after sleep, interface changes, or counter resets. Named
+workspaces are discovered automatically; numeric keyboard bindings are unchanged. No
 screen-recording permission is needed for this configuration (it does not mirror
 native menu-bar items).
 
