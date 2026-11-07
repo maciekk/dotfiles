@@ -32,6 +32,72 @@ aerospace reload-config
 ```
 
 The template leaves start-at-login and automatic config reloading disabled.
+It also reserves 32pt at the bottom for SketchyBar and notifies the bar on
+workspace changes (see below).
+
+## SketchyBar (macOS)
+
+A bottom-mounted AeroSpace dashboard, leaving the native menu bar and Ice
+untouched. The bar uses a pinned near-black charcoal palette, a compact 28pt
+height, and flat items without pill backgrounds. It shows:
+
+- Occupied workspaces plus the active workspace, with clickable workspace
+  numbers/names and full lowercase app names (e.g. `firefox`, `ghostty`,
+  `obsidian`). Empty inactive workspaces hide; system statuses retain their
+  Nerd Font icons.
+- Focused app/window title (truncated), volume, battery/charging, and clock.
+- Blue active-workspace number; text is 90% white (`#e6e6e6`), and low battery
+  gets a warning color.
+
+Install dependencies (the font is already installed on this Mac):
+
+```sh
+brew tap FelixKratz/formulae
+brew install sketchybar jq
+brew install --cask font-jetbrains-mono-nerd-font
+```
+
+Back up any existing `~/.config/sketchybar` directory before deploying:
+
+```sh
+./do-stow.sh sketchybar
+brew services start sketchybar
+sketchybar --reload
+aerospace reload-config
+```
+
+Configuration lives in `sketchybar/dot-config/sketchybar/`:
+
+- `sketchybarrc`: layout, fonts, event subscriptions, and click actions.
+- `colors.sh`: pinned dark charcoal palette (independent of macOS appearance).
+- `plugins/aerospace.sh`: workspace reconciliation and window title.
+- `plugins/app-labels.sh`: full application names, converted to lowercase.
+- `plugins/status.sh`: volume, battery, and clock. Click volume to open Sound
+  settings.
+
+Workspace switches update immediately through AeroSpace's
+`exec-on-workspace-change` callback. App lists/window titles refresh every five
+seconds, with extra updates when the front app changes. Unchanged workspace
+polls are read-only; actual changes are batched, and items are only reordered
+when new ones are added to avoid flicker. Status refreshes every 30 seconds, and volume also reacts to volume-change events. Named workspaces
+are discovered automatically; numeric keyboard bindings are unchanged. No
+screen-recording permission is needed for this configuration (it does not mirror
+native menu-bar items).
+
+The bar is foregrounded so tiled windows cannot obscure it; the AeroSpace bottom
+gap is 28pt for the bar plus 4pt breathing room. Native macOS fullscreen hides the
+bar. On multiple displays, each bar shows the same global workspace list.
+
+After editing, run `sketchybar --reload`. To stop using it:
+
+```sh
+brew services stop sketchybar
+```
+
+Also restore `gaps.outer.bottom = 0` in `aerospace/dot-aerospace.toml` and run
+`aerospace reload-config` to reclaim the reserved space. The original demo
+configuration was backed up outside the repo at
+`~/.config/sketchybar.backup-20261107-120854`.
 
 ## Theme auto-switching
 
@@ -46,7 +112,8 @@ all following applications. This is appearance switching, not Night Shift
 Tools can use different palettes, but should agree on light versus dark.
 Prefer native OS/terminal appearance support; use a small adapter only when
 needed. Keep machine-specific overrides local rather than changing shared
-config defaults.
+config defaults. SketchyBar is an intentional exception: its charcoal palette
+is pinned dark by preference, to blend with the laptop bezel.
 
 ### Current setup
 

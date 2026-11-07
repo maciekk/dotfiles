@@ -10,6 +10,10 @@ config-version = 2
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = []
 
+# SketchyBar highlights workspace changes immediately; window/app lists also
+# refresh periodically. Absolute PATH works when AeroSpace starts from Finder.
+exec-on-workspace-change = ['/bin/bash', '-c', '/opt/homebrew/bin/sketchybar --trigger aerospace_workspace_change']
+
 # Start AeroSpace at login
 start-at-login = false
 
@@ -74,7 +78,7 @@ key-mapping.preset = 'qwerty'
 gaps.inner.horizontal = 0
 gaps.inner.vertical =   0
 gaps.outer.left =       0
-gaps.outer.bottom =     0
+gaps.outer.bottom =     32 # 28pt SketchyBar + 4pt breathing room
 gaps.outer.top =        0
 gaps.outer.right =      0
 

@@ -1,0 +1,45 @@
+#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+CONFIG_DIR="${CONFIG_DIR:-$HOME/.config/sketchybar}"
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+source "$CONFIG_DIR/colors.sh"
+
+# Keep the native menu bar and Ice. AeroSpace reserves 32pt at the bottom.
+sketchybar --bar position=bottom height=28 margin=0 y_offset=0 \
+  color="$BAR" topmost=on sticky=on show_in_fullscreen=off \
+  padding_left=8 padding_right=8 shadow=off
+
+sketchybar --default \
+  icon.font='JetBrainsMono Nerd Font Mono:Regular:14.0' \
+  label.font='Helvetica Neue:Medium:12.0' \
+  icon.color="$TEXT" label.color="$TEXT" \
+  padding_left=4 padding_right=4 \
+  icon.padding_left=2 icon.padding_right=3 \
+  label.padding_left=1 label.padding_right=2 \
+  background.drawing=off background.height=0 background.corner_radius=0
+
+sketchybar --add event aerospace_workspace_change
+
+# An invisible controller reconciles app indicators and new named workspaces.
+# Polling catches window opens/closes and title changes missed by callbacks.
+sketchybar --add item aerospace_controller left \
+  --set aerospace_controller drawing=off update_freq=5 \
+    script="$PLUGIN_DIR/aerospace.sh" \
+  --subscribe aerospace_controller aerospace_workspace_change \
+    front_app_switched space_change system_woke
+
+sketchybar --add item front_window center \
+  --set front_window icon.drawing=off label.max_chars=55 label.color="$MUTED"
+
+sketchybar --add item clock right \
+  --set clock icon='' update_freq=30 script="$PLUGIN_DIR/status.sh" \
+  --subscribe clock system_woke \
+  --add item battery right \
+  --set battery icon='' \
+  --add item volume right \
+  --set volume icon='󰕾' \
+    script="$PLUGIN_DIR/status.sh" \
+    click_script='open "x-apple.systempreferences:com.apple.Sound-Settings.extension"' \
+  --subscribe volume volume_change
+
+sketchybar --update
