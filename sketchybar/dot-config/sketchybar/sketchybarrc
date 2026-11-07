@@ -13,8 +13,8 @@ sketchybar --bar position=top height=28 margin=0 y_offset=0 \
   padding_left=8 padding_right=8 shadow=off
 
 sketchybar --default \
-  icon.font='JetBrainsMono Nerd Font Mono:Regular:14.0' \
-  label.font='Helvetica Neue:Medium:12.0' \
+  icon.font='JetBrainsMono Nerd Font Mono:Regular:15.0' \
+  label.font='Helvetica Neue:Medium:13.0' \
   icon.color="$TEXT" label.color="$TEXT" \
   padding_left=4 padding_right=4 \
   icon.padding_left=2 icon.padding_right=3 \

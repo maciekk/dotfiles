@@ -51,8 +51,8 @@ while IFS= read -r ws; do
     printf -v click '%q workspace %q' "$(command -v aerospace)" "$ws"
     changes+=(--add item "$item" left
       --set "$item" click_script="$click"
-        label.font='Helvetica Neue:Medium:12.0'
-        icon.font='Helvetica Neue:Bold:12.0' background.drawing=off)
+        label.font='Helvetica Neue:Medium:13.0'
+        icon.font='Helvetica Neue:Bold:13.0' background.drawing=off)
     added=true
   fi
   labels=''
