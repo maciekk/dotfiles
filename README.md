@@ -6,6 +6,29 @@ For each "package" directory, run:
 Or, more conveniently:
   `./do-stow.sh $PACKAGE`
 
+## AeroSpace (macOS)
+
+`aerospace/dot-aerospace.toml` is an unchanged copy of the default template
+bundled with AeroSpace 0.21.3-Beta at
+`/Applications/AeroSpace.app/Contents/Resources/default-config.toml`.
+
+Install the symlink at `~/.aerospace.toml`:
+
+```sh
+./do-stow.sh aerospace
+```
+
+If that path already contains a config, back it up and reconcile it before
+stowing. Edit `aerospace/dot-aerospace.toml` to customize your configuration;
+edits through the home-directory symlink also update the repository file.
+With AeroSpace running, apply changes using:
+
+```sh
+aerospace reload-config
+```
+
+The template leaves start-at-login and automatic config reloading disabled.
+
 ## Theme auto-switching
 
 ### Shared policy
