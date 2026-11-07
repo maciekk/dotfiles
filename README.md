@@ -11,11 +11,12 @@ Or, more conveniently:
 `aerospace/dot-aerospace.toml` is based on the default template bundled with
 AeroSpace 0.21.3-Beta at
 `/Applications/AeroSpace.app/Contents/Resources/default-config.toml`.
-Workspaces are limited to 1–9 and 0: Alt-number switches workspace and
-Alt-Shift-number moves a window there. Letter-based workspace bindings are
-removed; Alt-f toggles AeroSpace fullscreen. The default h/j/k/l focus and
-movement bindings remain. Alt-m minimizes the focused window using native macOS
-minimization; restore it from the Dock or the app's Window menu.
+Persistent workspaces are `1-plan`, `2-browser`, `3-work`, then `4`–`9` and `0`.
+Alt-number switches workspace and Alt-Shift-number moves a window there; the
+number keys still map to the corresponding numeric prefix. Alt-f toggles
+AeroSpace fullscreen; Alt-m minimizes the focused window using native macOS
+minimization. Restore minimized windows from the Dock or the app's Window menu.
+The default h/j/k/l focus and movement bindings remain.
 
 Install the symlink at `~/.aerospace.toml`:
 

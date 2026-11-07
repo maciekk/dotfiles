@@ -54,7 +54,7 @@ automatically-unhide-macos-hidden-apps = false
 # even when they are invisible.
 # This config option is only available since 'config-version = 2'
 # Fallback value (if you omit the key): persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+persistent-workspaces = ["1-plan", "2-browser", "3-work", "4", "5", "6", "7", "8", "9", "0"]
 
 # A callback that runs every time binding mode changes
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
@@ -140,9 +140,9 @@ gaps.outer.right =      0
     alt-equal = 'resize smart +50'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
-    alt-1 = 'workspace 1'
-    alt-2 = 'workspace 2'
-    alt-3 = 'workspace 3'
+    alt-1 = 'workspace 1-plan'
+    alt-2 = 'workspace 2-browser'
+    alt-3 = 'workspace 3-work'
     alt-4 = 'workspace 4'
     alt-5 = 'workspace 5'
     alt-6 = 'workspace 6'
@@ -152,9 +152,9 @@ gaps.outer.right =      0
     alt-0 = 'workspace 0'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
-    alt-shift-1 = 'move-node-to-workspace 1'
-    alt-shift-2 = 'move-node-to-workspace 2'
-    alt-shift-3 = 'move-node-to-workspace 3'
+    alt-shift-1 = 'move-node-to-workspace 1-plan'
+    alt-shift-2 = 'move-node-to-workspace 2-browser'
+    alt-shift-3 = 'move-node-to-workspace 3-work'
     alt-shift-4 = 'move-node-to-workspace 4'
     alt-shift-5 = 'move-node-to-workspace 5'
     alt-shift-6 = 'move-node-to-workspace 6'

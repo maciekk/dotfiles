@@ -17,7 +17,7 @@ changes=()
 ordered=()
 added=false
 
-# Numeric workspaces first (0 after 9), then ad hoc named workspaces.
+# Sort by numeric prefix (1-plan, 2-browser, ..., 9, 0), then other names.
 while IFS= read -r ws; do
   item="workspace.$ws"
   current='{}'
@@ -72,9 +72,11 @@ while IFS= read -r ws; do
       label="$labels" label.drawing="$label_drawing"
       background.drawing=off icon.color="$fg" label.color="$TEXT")
   fi
-done < <(jq -r 'sort_by(if (.workspace | test("^[0-9]+$")) then
-  [0, (if .workspace == "0" then 10 else (.workspace | tonumber) end)]
-  else [1, .workspace] end) | .[].workspace' <<< "$workspaces")
+done < <(jq -r 'sort_by(.workspace as $ws |
+  ((try ($ws | capture("^(?<n>[0-9]+)(?:-|$)").n | tonumber) catch null) // null) as $n |
+  if $n == null then [1, 0, $ws]
+  else [0, (if $n == 0 then 10 else $n end), $ws] end
+  ) | .[].workspace' <<< "$workspaces")
 
 # Clean up dynamically named workspaces that no longer exist.
 while IFS= read -r item; do
