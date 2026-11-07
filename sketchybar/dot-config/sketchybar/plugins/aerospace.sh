@@ -53,6 +53,8 @@ while IFS= read -r ws; do
       --set "$item" click_script="$click"
         label.font='Helvetica Neue:Medium:13.0'
         icon.font='Helvetica Neue:Bold:13.0'
+        padding_left=0 padding_right=0
+        icon.padding_left=6 label.padding_right=6
         background.height=22 background.corner_radius=5
         background.color="$ACTIVE_BG" background.drawing=off)
     added=true
@@ -72,8 +74,14 @@ while IFS= read -r ws; do
     label_color="$MUTED"
     background=off
   fi
+  # Move 4pt of outer spacing inside each edge of the highlight. Text and
+  # total item spacing stay fixed, including an empty focused workspace.
   label_drawing=off
-  [[ -n "$labels" ]] && label_drawing=on
+  icon_right=7
+  if [[ -n "$labels" ]]; then
+    label_drawing=on
+    icon_right=3
+  fi
   if ! jq -e --arg ws "$display_name" --arg label "$labels" \
       --arg drawing "$label_drawing" --arg fg "$fg" --arg text "$label_color" \
       --arg background "$background" '
@@ -82,7 +90,7 @@ while IFS= read -r ws; do
       .geometry.background.drawing == $background and
       .icon.color == $fg and .label.color == $text' <<< "$current" >/dev/null; then
     changes+=(--set "$item" drawing=on icon="$display_name"
-      label="$labels" label.drawing="$label_drawing"
+      label="$labels" label.drawing="$label_drawing" icon.padding_right="$icon_right"
       background.drawing="$background" icon.color="$fg" label.color="$label_color")
   fi
 done < <(jq -r 'sort_by(.workspace as $ws |
