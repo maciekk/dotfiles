@@ -14,7 +14,8 @@ AeroSpace 0.21.3-Beta at
 Workspaces are limited to 1–9 and 0: Alt-number switches workspace and
 Alt-Shift-number moves a window there. Letter-based workspace bindings are
 removed; Alt-f toggles AeroSpace fullscreen. The default h/j/k/l focus and
-movement bindings remain.
+movement bindings remain. Alt-m minimizes the focused window using native macOS
+minimization; restore it from the Dock or the app's Window menu.
 
 Install the symlink at `~/.aerospace.toml`:
 

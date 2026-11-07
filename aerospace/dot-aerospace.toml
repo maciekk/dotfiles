@@ -120,6 +120,9 @@ gaps.outer.right =      0
     # See: https://nikitabobko.github.io/AeroSpace/commands#fullscreen
     alt-f = 'fullscreen'
 
+    # Native minimize; restore from the Dock or the app's Window menu.
+    alt-m = 'macos-native-minimize'
+
     # See: https://nikitabobko.github.io/AeroSpace/commands#focus
     alt-h = 'focus left'
     alt-j = 'focus down'
