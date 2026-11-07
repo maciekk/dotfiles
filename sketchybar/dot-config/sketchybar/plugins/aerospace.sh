@@ -94,9 +94,7 @@ if $added; then
 fi
 
 front=$(aerospace list-windows --focused --json 2>/dev/null) || front='[]'
-title=$(jq -r '.[0] | if . == null then "Desktop" else
-  .["app-name"] + (if .["window-title"] == "" then "" else " — " + .["window-title"] end)
-  end | gsub("[\\r\\n\\t]"; " ") | if length > 55 then .[0:54] + "…" else . end' <<< "$front")
+title=$(jq -r -f "$CONFIG_DIR/plugins/window-title.jq" <<< "$front")
 current_title=$(sketchybar --query front_window | jq -r '.label.value')
 if [[ "$title" != "$current_title" ]]; then
   changes+=(--set front_window label="$title")

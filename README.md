@@ -32,14 +32,17 @@ aerospace reload-config
 ```
 
 The template leaves start-at-login and automatic config reloading disabled.
-It also reserves 32pt at the bottom for SketchyBar and notifies the bar on
-workspace changes (see below).
+It also reserves 32pt at the top of external displays for SketchyBar and
+notifies the bar on workspace changes (see below). The built-in display uses
+no additional top gap because macOS already reserves 32pt for the notch.
 
 ## SketchyBar (macOS)
 
-A bottom-mounted AeroSpace dashboard, leaving the native menu bar and Ice
-untouched. The bar uses a pinned near-black charcoal palette, a compact 28pt
-height, and flat items without pill backgrounds. It shows:
+A top-mounted AeroSpace dashboard with the native menu bar set to auto-hide.
+Reveal the native bar at the top edge for application menus and Ice-managed
+status icons. SketchyBar stays above app windows but below the revealed native
+menu bar (`topmost=window`). The bar uses a pinned near-black charcoal palette,
+a compact 28pt height, and flat items without pill backgrounds. It shows:
 
 - Occupied workspaces plus the active workspace, with clickable workspace
   numbers/names and full lowercase app names (e.g. `firefox`, `ghostty`,
@@ -66,11 +69,23 @@ sketchybar --reload
 aerospace reload-config
 ```
 
+Enable native menu-bar auto-hide in System Settings (search for “automatically
+hide and show the menu bar” and select Always), or apply it on this Mac with:
+
+```sh
+osascript -e 'tell application "System Events" to tell dock preferences to set autohide menu bar to true'
+```
+
+This preference is machine-local, not applied automatically by Stow. The focused
+window title sits on the left rather than beneath the MacBook's camera notch.
+
 Configuration lives in `sketchybar/dot-config/sketchybar/`:
 
 - `sketchybarrc`: layout, fonts, event subscriptions, and click actions.
 - `colors.sh`: pinned dark charcoal palette (independent of macOS appearance).
 - `plugins/aerospace.sh`: workspace reconciliation and window title.
+- `plugins/window-title.jq`: title formatting; strips Obsidian's vault/version
+  suffix while preserving the document name. All titles are capped at 55 chars.
 - `plugins/app-labels.sh`: full application names, converted to lowercase.
 - `plugins/status.sh`: volume, battery, and clock. Click volume to open Sound
   settings.
@@ -84,9 +99,10 @@ are discovered automatically; numeric keyboard bindings are unchanged. No
 screen-recording permission is needed for this configuration (it does not mirror
 native menu-bar items).
 
-The bar is foregrounded so tiled windows cannot obscure it; the AeroSpace bottom
-gap is 28pt for the bar plus 4pt breathing room. Native macOS fullscreen hides the
-bar. On multiple displays, each bar shows the same global workspace list.
+The bar is foregrounded so tiled windows cannot obscure it; the AeroSpace top
+gap on external displays is 28pt for the bar plus 4pt breathing room. The
+built-in display has no extra gap, since macOS already excludes the 32pt notch
+area from its usable frame. Native macOS fullscreen hides the bar. On multiple displays, each bar shows the same global workspace list.
 
 After editing, run `sketchybar --reload`. To stop using it:
 
@@ -94,8 +110,10 @@ After editing, run `sketchybar --reload`. To stop using it:
 brew services stop sketchybar
 ```
 
-Also restore `gaps.outer.bottom = 0` in `aerospace/dot-aerospace.toml` and run
-`aerospace reload-config` to reclaim the reserved space. The original demo
+Also restore `gaps.outer.top = 0` in `aerospace/dot-aerospace.toml` and run
+`aerospace reload-config` to reclaim the reserved space. To restore the always
+visible native menu bar, disable auto-hide in System Settings or run
+`osascript -e 'tell application "System Events" to tell dock preferences to set autohide menu bar to false'`. The original demo
 configuration was backed up outside the repo at
 `~/.config/sketchybar.backup-20261107-120854`.
 

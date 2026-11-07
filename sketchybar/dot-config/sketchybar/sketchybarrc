@@ -4,9 +4,12 @@ CONFIG_DIR="${CONFIG_DIR:-$HOME/.config/sketchybar}"
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
 
-# Keep the native menu bar and Ice. AeroSpace reserves 32pt at the bottom.
-sketchybar --bar position=bottom height=28 margin=0 y_offset=0 \
-  color="$BAR" topmost=on sticky=on show_in_fullscreen=off \
+# Native menu bar auto-hides; Ice remains accessible when it is revealed.
+# Stay above normal windows, but below the revealed native menu bar.
+# AeroSpace reserves 32pt at the top on external displays; macOS already
+# reserves the notch area on the built-in display.
+sketchybar --bar position=top height=28 margin=0 y_offset=0 \
+  color="$BAR" topmost=window sticky=on show_in_fullscreen=off \
   padding_left=8 padding_right=8 shadow=off
 
 sketchybar --default \
@@ -28,7 +31,14 @@ sketchybar --add item aerospace_controller left \
   --subscribe aerospace_controller aerospace_workspace_change \
     front_app_switched space_change system_woke
 
-sketchybar --add item front_window center \
+# Visually separate workspaces from the focused window title.
+sketchybar --add item workspace_separator left \
+  --set workspace_separator icon='┃' icon.font='Helvetica Neue:Bold:17.0' \
+    icon.color="$TEXT" icon.padding_left=6 icon.padding_right=10 \
+    label.drawing=off
+
+# Keep the title out of the MacBook's central camera notch.
+sketchybar --add item front_window left \
   --set front_window icon.drawing=off label.max_chars=55 label.color="$MUTED"
 
 sketchybar --add item clock right \
