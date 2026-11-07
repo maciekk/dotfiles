@@ -52,9 +52,9 @@ menu bar (`topmost=window`). The bar uses a pinned near-black charcoal palette,
 a compact 28pt height, and flat items without pill backgrounds. It shows:
 
 - Occupied workspaces plus the active workspace, with clickable workspace
-  numbers/names and full lowercase app names (e.g. `firefox`, `ghostty`,
-  `obsidian`). Empty inactive workspaces hide; system statuses retain their
-  Nerd Font icons.
+  numbers (purpose suffixes are hidden) and full lowercase app names
+  (e.g. `firefox`, `ghostty`, `obsidian`). Empty inactive workspaces hide;
+  system statuses retain their Nerd Font icons.
 - Focused app/window title (truncated), volume, battery/charging, and clock.
 - Blue active-workspace number; text is 90% white (`#e6e6e6`), and low battery
   gets a warning color.

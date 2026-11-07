@@ -20,6 +20,12 @@ added=false
 # Sort by numeric prefix (1-plan, 2-browser, ..., 9, 0), then other names.
 while IFS= read -r ws; do
   item="workspace.$ws"
+  # Compact display for numbered names; retain the full ID for click actions.
+  number="${ws%%-*}"
+  case "$number" in
+    ''|*[!0-9]*) display_name="$ws" ;;
+    *) display_name="$number" ;;
+  esac
   current='{}'
   exists=false
   if grep -Fxq -- "$item" <<< "$items"; then
@@ -62,13 +68,13 @@ while IFS= read -r ws; do
   fi
   label_drawing=off
   [[ -n "$labels" ]] && label_drawing=on
-  if ! jq -e --arg ws "$ws" --arg label "$labels" \
+  if ! jq -e --arg ws "$display_name" --arg label "$labels" \
       --arg drawing "$label_drawing" --arg fg "$fg" --arg text "$TEXT" '
       .geometry.drawing == "on" and .icon.value == $ws and
       .label.value == $label and .label.drawing == $drawing and
       .geometry.background.drawing == "off" and
       .icon.color == $fg and .label.color == $text' <<< "$current" >/dev/null; then
-    changes+=(--set "$item" drawing=on icon="$ws"
+    changes+=(--set "$item" drawing=on icon="$display_name"
       label="$labels" label.drawing="$label_drawing"
       background.drawing=off icon.color="$fg" label.color="$TEXT")
   fi
