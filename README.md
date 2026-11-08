@@ -57,10 +57,11 @@ icons (16pt for CPU/Wi-Fi/weather/clock, 18pt otherwise, 20pt for the battery). 
   `Fire`, `Ghost`, `GPT`, `SMS`; other names remain lowercase. Empty inactive
   workspaces hide. The focused workspace gets a cyan-tinted highlight;
   inactive labels are muted.
-- Focused app/window title (truncated), volume, battery/charging, with lavender
-  weather and a light-blue clock accent. Battery colour is green on AC, amber at ≤20%, red at ≤10%.
+- Focused app/window title (truncated), volume, battery/charging, with matching
+  light-blue weather and clock accents. Battery colour is green on AC, amber at ≤20%, red at ≤10%.
 - CPU usage percentage: green below 25%, amber at 25–69%, red at 70%+.
-  Click to open Activity Monitor.
+  Click to open Activity Monitor. CPU and network labels reserve compact
+  widths for typical two-digit values, rather than every possible maximum.
 - Wi-Fi name/status and live download/upload rates (`K`/`M` = KiB/MiB per
   second) on the default-route interface. Click to open Wi-Fi settings.
 - Waterloo, Ontario weather in Celsius from [Open-Meteo](https://open-meteo.com/)

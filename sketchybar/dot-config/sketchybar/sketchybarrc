@@ -42,7 +42,8 @@ sketchybar --add item front_window left \
   --set front_window icon.drawing=off label.max_chars=24 label.color="$MUTED"
 
 sketchybar --add item clock right \
-  --set clock icon='' icon.font='Hack Nerd Font:Regular:16.0' update_freq=30 script="$PLUGIN_DIR/status.sh" \
+  --set clock icon='' icon.font='Hack Nerd Font:Regular:16.0' \
+    update_freq=30 script="$PLUGIN_DIR/status.sh" \
   --subscribe clock system_woke power_source_change \
   --add item battery right \
   --set battery icon='' icon.font='Hack Nerd Font:Regular:20.0' \
@@ -63,7 +64,7 @@ sketchybar --add item status_separator right \
   --add item network right \
   --set network icon='↓' icon.color="$ACCENT" label='—' \
     update_freq=5 script="$PLUGIN_DIR/network.sh" \
-    label.font='Helvetica Neue:Medium:12.0' \
+    label.font='Helvetica Neue:Medium:12.0' label.width=64 label.align=left \
     click_script='open "x-apple.systempreferences:com.apple.wifi-settings-extension"' \
   --subscribe network wifi_change system_woke \
   --add item wifi right \
@@ -73,6 +74,7 @@ sketchybar --add item status_separator right \
     click_script='open "x-apple.systempreferences:com.apple.wifi-settings-extension"' \
   --add item cpu right \
   --set cpu icon='' label='—' icon.color="$MUTED" \
+    label.width=26 label.align=right \
     icon.font='Hack Nerd Font:Regular:16.0' \
     update_freq=10 script="$PLUGIN_DIR/metrics.sh" \
     click_script='open -a "Activity Monitor"' \
