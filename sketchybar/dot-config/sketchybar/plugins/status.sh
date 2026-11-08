@@ -15,8 +15,17 @@ if [[ "$volume" =~ ^[0-9]+$ ]]; then
     [345][0-9]) icon='󰖀' ;;
     *) icon='󰕾' ;;
   esac
+  if (( volume < 33 )); then
+    color="$DIM"
+  elif (( volume <= 66 )); then
+    color="$MUTED"
+  elif (( volume <= 80 )); then
+    color="$WARNING"
+  else
+    color="$CRITICAL"
+  fi
   sketchybar --set volume icon="$icon" label="${volume}%" \
-    icon.color="$TEXT" label.color="$TEXT"
+    icon.color="$color" label.color="$color"
 fi
 # Volume changes don't need to run the remaining status checks.
 [[ "$SENDER" == volume_change ]] && exit 0
