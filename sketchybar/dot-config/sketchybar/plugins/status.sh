@@ -25,7 +25,7 @@ if [[ "$volume" =~ ^[0-9]+$ ]]; then
     color="$CRITICAL"
   fi
   sketchybar --set volume icon="$icon" label="${volume}%" \
-    icon.color="$color" label.color="$color"
+    icon.color="$TEXT" label.color="$color"
 fi
 # Volume changes don't need to run the remaining status checks.
 [[ "$SENDER" == volume_change ]] && exit 0
