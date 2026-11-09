@@ -320,9 +320,88 @@ _repos_pull() {
   (( skipped == 0 && failed == 0 ))
 }
 
+typeset -g _repos_filter_legend='Filters: u|unpushed  m|modified|dirty  b|behind  q|unknown  dot|src  (^F excludes F; -o only listed statuses; -n paths only)'
+
+_repos_status() {
+  emulate -L zsh
+  local group stamp flags shown arg letter neg names=0 only=0
+  local want='' skip='' repo
+  local -a groups only_groups skip_groups
+  local -i filtering=0
+  # Plain filters are OR'd; ^-prefixed filters exclude (AND NOT).
+  for arg in "$@"; do
+    if [[ $arg == -n || $arg == --names ]]; then
+      names=1
+      continue
+    fi
+    if [[ $arg == -o || $arg == --only ]]; then
+      only=1
+      continue
+    fi
+    neg=0
+    [[ $arg == \^?* ]] && { neg=1; arg=${arg#^}; }
+    letter=''
+    case $arg in
+      dot|src)
+        filtering=1
+        if (( neg )); then skip_groups+=$arg; else only_groups+=$arg; fi
+        continue
+        ;;
+      u|unpushed) letter=U ;;
+      m|modified|dirty) letter=M ;;
+      b|behind) letter=B ;;
+      q|unknown) letter=Q ;;
+      *)
+        print -ru2 -- "repos: unknown filter '$arg'"
+        print -ru2 -- "$_repos_filter_legend"
+        return 2
+        ;;
+    esac
+    filtering=1
+    if (( neg )); then skip+=$letter; else want+=$letter; fi
+  done
+  # --only: a repo may carry no status beyond the listed ones.
+  (( only )) && [[ -n $want ]] && skip+=${${:-UMBQ}//[$want]/}
+  groups=(dot src)
+  (( ${#only_groups} )) && groups=($only_groups)
+  groups=(${(u)groups:|skip_groups})
+  if (( ! names )); then
+    print -r -- 'FLAGS  REPOSITORY  (↑ unpushed, * modified, ↓ behind, ? unknown, ~ stale fetch)'
+    (( filtering )) && print -r -- "$_repos_filter_legend"
+  fi
+  for group in $groups; do
+    if [[ ! -r $REPOS_CACHE/$group ]]; then
+      (( names )) || print -r -- "$group: not scanned; run repos refresh"
+      continue
+    fi
+    {
+      read -r stamp
+      (( names )) || print -r -- "$group: checked $(( EPOCHSECONDS - stamp ))s ago"
+      while IFS=$'\t' read -r flags repo; do
+        [[ $flags == - ]] && continue
+        # A failed fetch is reported as unknown, so q matches both.
+        flags=${flags//F/Q}
+        [[ -n $want && $flags != *[$want]* ]] && continue
+        [[ -n $skip && $flags == *[$skip]* ]] && continue
+        if (( names )); then
+          print -r -- "$repo"
+          continue
+        fi
+        shown=${flags//QQ/Q}
+        shown=${shown//U/↑}; shown=${shown//M/*}; shown=${shown//B/↓}; shown=${shown//Q/?}
+        # Pad by characters, not bytes, so the path column never shifts.
+        print -r -- "${(r:5:)shown}  $repo"
+      done
+    } < "$REPOS_CACHE/$group"
+  done
+  if (( ! names )); then
+    _repos_read
+    print -r -- "Summary: ${_repos_text:-clean}"
+  fi
+}
+
 repos() {
   emulate -L zsh
-  local group stamp flags repo
   case ${1:-status} in
     pull)
       shift
@@ -333,23 +412,86 @@ repos() {
       _repos_read
       ;;
     status)
-      print -r -- 'FLAGS  REPOSITORY  (↑ unpushed, * modified, ↓ behind, ? unknown, ~ stale fetch)'
-      for group in dot src; do
-        [[ -r $REPOS_CACHE/$group ]] || { print -r -- "$group: not scanned; run repos refresh"; continue; }
-        {
-          read -r stamp
-          print -r -- "$group: checked $(( EPOCHSECONDS - stamp ))s ago"
-          while IFS=$'\t' read -r flags repo; do
-            [[ $flags == - ]] && continue
-            flags=${flags//U/↑}; flags=${flags//M/*}; flags=${flags//B/↓}; flags=${flags//F/Q}; flags=${flags//QQ/Q}; flags=${flags//Q/?}
-            print -r -- "$flags  $repo"
-          done
-        } < "$REPOS_CACHE/$group"
-      done
-      _repos_read
-      print -r -- "Summary: ${_repos_text:-clean}"
+      (( $# )) && shift
+      _repos_status "$@"
       ;;
-    *) print -u2 'Usage: repos [status|refresh|pull REPO ...]'; return 2 ;;
+    *) print -u2 'Usage: repos [status [FILTER ...] [-o] [-n]|refresh|pull REPO ...]'; return 2 ;;
+  esac
+}
+
+# Repository paths from the scan cache; completion must not walk ~/src.
+_repos_cached_paths() {
+  emulate -L zsh
+  local group stamp flags repo
+  for group in dot src; do
+    [[ -r $REPOS_CACHE/$group ]] || continue
+    {
+      read -r stamp
+      while IFS=$'\t' read -r flags repo; do
+        [[ -n $repo ]] && print -r -- "$repo"
+      done
+    } < "$REPOS_CACHE/$group"
+  done
+}
+
+_repos() {
+  local -a subcommands=(
+    'status:cached per-repo details (accepts filters)'
+    'refresh:synchronous rescan'
+    'pull:fast-forward pull of named repositories'
+  )
+  if (( CURRENT == 2 )); then
+    _describe -t commands 'repos command' subcommands
+    return
+  fi
+  case $words[2] in
+    status)
+      local -a filters=(
+        'u:unpushed' 'unpushed:local branch ahead of upstream'
+        'm:modified' 'modified:uncommitted changes' 'dirty:uncommitted changes'
+        'b:behind' 'behind:local branch behind upstream'
+        'q:unknown' 'unknown:missing upstream, detached, error, failed fetch'
+        'dot:dotfiles checkout only' 'src:repositories under REPOS_ROOT only'
+      )
+      local -a switches=(
+        '-n:print matching paths only' '--names:print matching paths only'
+        '-o:only the listed statuses, nothing else'
+        '--only:only the listed statuses, nothing else'
+      )
+      if [[ $PREFIX == \^* ]]; then
+        compset -P '\^'
+        _describe -t filters 'excluded status' filters
+      else
+        _describe -t filters 'status filter' filters
+        [[ $PREFIX == -* ]] && _describe -t switches 'switch' switches
+      fi
+      ;;
+    pull)
+      local repo dot=${REPOS_DOTFILES:A}
+      local -a paths names
+      local -A count
+      paths=(${(f)"$(_repos_cached_paths)"})
+      # Names already typed are not offered again.
+      paths=(${paths:|words})
+      # Absolute paths, or ~/... (the literal ~ moves into IPREFIX).
+      if compset -P '\~'; then
+        _wanted repositories expl 'repository path' compadd -- ${${(M)paths:#$HOME/*}#$HOME}
+        return
+      elif [[ $PREFIX == /* ]]; then
+        _wanted repositories expl 'repository path' compadd -- $paths
+        return
+      fi
+      for repo in $paths; do (( ++count[${repo:t}] )); done
+      for repo in $paths; do
+        if [[ ${repo:A} == $dot ]]; then
+          names+=dotfiles
+        elif (( count[${repo:t}] == 1 )); then
+          names+=${repo:t}
+        fi
+      done
+      names=(${names:|words})
+      _wanted repositories expl 'repository' compadd -- $names
+      ;;
   esac
 }
 
@@ -369,4 +511,6 @@ else
   autoload -Uz add-zsh-hook
   add-zsh-hook -d precmd _repos_precmd
   add-zsh-hook precmd _repos_precmd
+  # .zshrc sources this after oh-my-zsh has run compinit.
+  (( $+functions[compdef] )) && compdef _repos repos
 fi
