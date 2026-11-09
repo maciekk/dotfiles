@@ -73,6 +73,42 @@ _repos_read
 print -r -- "-"$'\t'"\$(touch $tmp/should-not-exist)" >> "$REPOS_CACHE/src"
 _repos_read
 [[ ! -e $tmp/should-not-exist ]]
+# Status filters read synthetic cache records; no rescan is involved.
+saved_cache=$REPOS_CACHE
+REPOS_CACHE="$tmp/filter-cache"
+mkdir -p "$REPOS_CACHE"
+print "$EPOCHSECONDS" > "$REPOS_CACHE/fetch"
+print -l -- "$EPOCHSECONDS" "U"$'\t'"/d/ahead" > "$REPOS_CACHE/dot"
+print -l -- "$EPOCHSECONDS" "M"$'\t'"/s/dirty" "MB"$'\t'"/s/dirty behind" \
+  "B"$'\t'"/s/behind" "F"$'\t'"/s/fetch failed" "UMBQ"$'\t'"/s/everything" \
+  "-"$'\t'"/s/clean" > "$REPOS_CACHE/src"
+names() { repos status -n "$@" | paste -sd '|' -; }
+[[ $(names) == '/d/ahead|/s/dirty|/s/dirty behind|/s/behind|/s/fetch failed|/s/everything' ]]
+[[ $(names behind) == '/s/dirty behind|/s/behind|/s/everything' ]]
+# Exclusions narrow the set: pullable means behind and not dirty.
+[[ $(names b ^m) == '/s/behind' ]]
+# Plain filters are OR'd.
+[[ $(names u q) == '/d/ahead|/s/fetch failed|/s/everything' ]]
+[[ $(names dot) == '/d/ahead' ]]
+# --only: the listed statuses and nothing else; a failed fetch counts as q.
+[[ $(names -o behind) == '/s/behind' ]]
+[[ $(names --only b m) == '/s/dirty|/s/dirty behind|/s/behind' ]]
+[[ $(names -o q) == '/s/fetch failed' ]]
+[[ $(names -o src u) == '' ]]
+[[ $(names ^dot dirty) == '/s/dirty|/s/dirty behind|/s/everything' ]]
+# -n output is paths only; filtered human output adds the legend line.
+[[ $(repos status -n | grep -c -e FLAGS -e Filters -e Summary) == 0 ]]
+repos status | grep -q '^Filters:' && exit 1
+repos status behind | grep -q '^Filters:'
+# Unknown filters fail with the legend on stderr.
+result=0
+repos status bogus > "$tmp/out" 2> "$tmp/err" || result=$?
+[[ $result == 2 && ! -s $tmp/out ]]
+grep -q "unknown filter 'bogus'" "$tmp/err" && grep -q '^Filters:' "$tmp/err"
+# The path column is aligned regardless of how many flags a repo has.
+[[ $(repos status | grep ' /' | while IFS= read -r line; do
+  print -r -- ${#${line%%/*}}; done | sort -u) == 7 ]]
+REPOS_CACHE=$saved_cache
 # Lock contention returns without rewriting snapshots; kernel releases on exit.
 (
   zsystem flock -t 0 -f fd "$REPOS_CACHE/lock"

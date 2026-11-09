@@ -360,7 +360,25 @@ visibility and does not replace the current-directory Git segment.
 repos status   # cached per-repo details, local scan ages, and summary
 repos refresh  # synchronous local rescan; also fetches if the fetch interval is due
 repos pull dotfiles gemini-slurp  # explicit, clean-working-tree, fast-forward-only pulls
+repos status behind ^modified     # filtered status
+repos status -o behind            # behind and nothing else
+repos pull ${(f)"$(repos status -n behind ^modified)"}  # pull every pullable repo
 ```
+
+`repos status [FILTER ...] [-o] [-n]` filters the cached listing. Filters are
+`u`/`unpushed`, `m`/`modified`/`dirty`, `b`/`behind`, `q`/`unknown` (includes
+failed fetches), and `dot`/`src` for a group. Plain filters are OR'd; a `^`
+prefix excludes. `-o`/`--only` keeps only repositories whose statuses are all
+among the listed ones: `-o b` is behind and nothing else; `-o b m` is behind,
+modified, or both. Filtered output starts with a one-line legend of the filters,
+and an unknown filter prints the legend and exits 2. `-n`/`--names` prints only
+the matching paths, one per line, for use in scripts. The summary line always
+covers every repository.
+
+Tab completion covers subcommands, filters and switches (including `^`
+exclusions), and `repos pull` repository names or `~/`/absolute paths. Names
+come from the scan cache, so completion never walks `~/src`; ambiguous basenames
+are offered only as paths.
 
 `repos pull REPO [REPO ...]` resolves unique directory names against freshly
 discovered repositories, or accepts absolute paths to those repositories.
@@ -421,5 +439,6 @@ Tests (temporary repositories, no network):
 ```sh
 zsh scripts/tests/repo-status.zsh
 zsh scripts/tests/repos-pull.zsh
+zsh scripts/tests/repos-completion.zsh
 zsh scripts/tests/p10k-appearance.zsh
 ```
