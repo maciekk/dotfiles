@@ -13,3 +13,5 @@ WIFI=0xffb8c4d2
 GOOD=0xff9bc69b
 WARNING=0xffe6bb78
 CRITICAL=0xffe18c91
+# Cheatsheet keys: a brighter, more saturated take on GOOD.
+KEYS=0xff86e08a
