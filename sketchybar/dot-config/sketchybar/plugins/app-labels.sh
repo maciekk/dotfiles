@@ -5,10 +5,14 @@ app_label() {
   name=$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')
   case "$name" in
     obsidian) printf '%s' 'Obsid' ;;
-    firefox) printf '%s' 'Fire' ;;
+    firefox) printf '%s' 'Fox' ;;
     ghostty) printf '%s' 'Ghost' ;;
     chatgpt) printf '%s' 'GPT' ;;
     messages) printf '%s' 'SMS' ;;
+    'microsoft outlook') printf '%s' 'Outl' ;;
+    'google chrome') printf '%s' 'Chrome' ;;
+    slack) printf '%s' 'Slack' ;;
+    claude) printf '%s' 'Claude' ;;
     *) printf '%s' "$name" ;;
   esac
 }

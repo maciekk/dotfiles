@@ -1,0 +1,20 @@
+# Repo-only test scripts; don't link them to ~/tests.
+^/tests$
+
+# Stow's defaults (a local ignore file replaces them).
+RCS
+.+,v
+CVS
+\.\#.+
+\.cvsignore
+\.svn
+_darcs
+\.hg
+\.git
+\.gitignore
+\.gitmodules
+.+~
+\#.*\#
+^/README.*
+^/LICENSE.*
+^/COPYING
