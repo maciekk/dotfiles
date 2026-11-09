@@ -94,4 +94,41 @@ check 'drawing=off'
 export MEDIA_DATA='null'
 run media
 check 'drawing=off'
+# Two monitors: the external one (display 2) sits left of the built-in one.
+sketchybar() {
+  case "$1 $2" in
+    '--query displays') echo '[{"arrangement-id":1,"frame":{"x":0}},{"arrangement-id":2,"frame":{"x":-2560}}]' ;;
+    '--query bar') echo '{"items":["workspace.4","workspaces_other","aerospace_controller","crumb_window","front_window"]}' ;;
+    '--query front_window') echo '{"label":{"value":"old"},"icon":{"value":""}}' ;;
+    *) printf '%s|' "$@" >> "$LOG"; printf '\n' >> "$LOG" ;;
+  esac
+}
+aerospace() {
+  case "$*" in
+    'list-workspaces '*) echo '[{"workspace":"9","monitor-appkit-nsscreen-screens-id":1,"workspace-is-focused":false,
+        "workspace-root-container-layout":"h_tiles","monitor-name":"Built-in Retina Display"},
+      {"workspace":"3-work","monitor-appkit-nsscreen-screens-id":2,"workspace-is-focused":true,
+        "workspace-root-container-layout":"v_accordion","monitor-name":"LEN T32p-20"}]' ;;
+    'list-windows --all '*) echo '[{"workspace":"3-work","app-name":"Ghostty"},{"workspace":"3-work","app-name":"Slack"},
+      {"workspace":"3-work","app-name":"Ghostty"},{"workspace":"4","app-name":"Firefox"},
+      {"workspace":"1","app-name":"Firefox"},{"workspace":"1-plan","app-name":"Obsidian"},
+      {"workspace":"0-dump","app-name":"Messages"},{"workspace":"misc","app-name":"Notes"}]' ;;
+    'list-windows --focused '*) echo '[{"app-name":"Ghostty","window-title":"vim","window-layout":"floating","window-is-fullscreen":false}]' ;;
+  esac
+}
+export -f sketchybar aerospace
+run aerospace
+check '--add|item|monitor.2|left|--set|monitor.2|icon=󰍹|icon.color=0xff9bc69b|'
+check 'label=3-work|label.color=0xff9bc69b|'
+check 'background.drawing=on|'
+check '--set|monitor.1|icon=󰌢|icon.color=0xff969fad|'
+check '--set|apps.2|display=2|'
+check 'icon=󰕵|'
+check 'label=Ghost² · Slack|label.color=0xffe6e9ef|'
+check '--set|apps.1|display=1|'
+check 'label=empty|label.color=0xff495361|'
+check '--set|workspaces_other|label=1 1-plan 4 0 misc|drawing=on|'
+check '--remove|workspace.4|'
+check '--move|monitor.2|before|workspaces_other|--move|apps.2|before|crumb_window|--move|monitor.1|'
+check '--set|front_window|label=Ghostty — vim|icon=󰖲|'
 printf 'Status plugin fixtures passed.\n'

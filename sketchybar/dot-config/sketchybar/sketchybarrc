@@ -26,23 +26,32 @@ sketchybar --add event aerospace_workspace_change
 # AeroSpace key cheatsheet popup (alt-shift-slash); leftmost, zero-width.
 source "$CONFIG_DIR/cheatsheet.sh"
 
-# An invisible controller reconciles app indicators and new named workspaces.
+# AeroSpace, as three breadcrumb sections (joined by ›) that narrow in scope:
+#   global     every monitor's visible workspace (󰍹 external, 󰌢 laptop),
+#              focused one highlighted, then other workspaces holding windows
+#   workspace  this display's workspace: tiling layout glyph + app labels
+#   window     the focused window: tiled/floating/fullscreen glyph + title
+# plugins/aerospace.sh adds the per-monitor items around these static ones.
 # Polling catches window opens/closes and title changes missed by callbacks.
-sketchybar --add item aerospace_controller left \
+crumb=(icon='󰅂' icon.font='Hack Nerd Font:Regular:16.0' icon.color="$DIM"
+  icon.padding_left=4 icon.padding_right=4 label.drawing=off)
+
+sketchybar --add item workspaces_other left \
+  --set workspaces_other drawing=off icon.drawing=off label.color="$MUTED" \
+    padding_left=4 padding_right=4 label.padding_left=2 \
+  --add item aerospace_controller left \
   --set aerospace_controller drawing=off update_freq=5 \
     script="$PLUGIN_DIR/aerospace.sh" \
   --subscribe aerospace_controller aerospace_workspace_change \
-    front_app_switched space_change system_woke
-
-# Visually separate workspaces from the focused window title.
-sketchybar --add item workspace_separator left \
-  --set workspace_separator icon='│' icon.font='Helvetica Neue:Regular:15.0' \
-    icon.color="$DIM" icon.padding_left=5 icon.padding_right=6 \
-    label.drawing=off
+    front_app_switched space_change display_change system_woke \
+  --add item crumb_workspace left --set crumb_workspace "${crumb[@]}" \
+  --add item crumb_window left --set crumb_window "${crumb[@]}"
 
 # Keep the title out of the MacBook's central camera notch.
 sketchybar --add item front_window left \
-  --set front_window icon.drawing=off label.max_chars=24 label.color="$MUTED"
+  --set front_window label.max_chars=24 label.color="$MUTED" \
+    icon='󱂬' icon.font='Hack Nerd Font:Regular:16.0' icon.color="$MUTED" \
+    icon.padding_right=5
 
 sketchybar --add item clock right \
   --set clock icon='' icon.font='Hack Nerd Font:Regular:16.0' \
