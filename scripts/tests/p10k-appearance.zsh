@@ -23,6 +23,8 @@ for simulated in light dark light; do
   [[ $POWERLEVEL9K_DIR_FOREGROUND == '#303446' ]]
   [[ $POWERLEVEL9K_VCS_CLEAN_BACKGROUND == '#a6d189' ]]
   [[ $POWERLEVEL9K_VCS_MODIFIED_BACKGROUND == '#e5c890' ]]
+  [[ $POWERLEVEL9K_VCS_CLEAN_FOREGROUND == '#303446' ]]
+  [[ $POWERLEVEL9K_VCS_META_FOREGROUND == '#303446' ]]
   [[ $POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND == '#303446' ]]
   [[ $POWERLEVEL9K_VIRTUALENV_FOREGROUND == '#303446' ]]
   if [[ $simulated == light ]]; then
@@ -63,6 +65,7 @@ source "$HOME/.p10k.zsh"
 [[ $POWERLEVEL9K_DIR_FOREGROUND == '#101010' ]]
 [[ $POWERLEVEL9K_VCS_CLEAN_BACKGROUND == '#55aa44' ]]
 [[ $POWERLEVEL9K_VCS_MODIFIED_BACKGROUND == '#aaaa44' ]]
+[[ $POWERLEVEL9K_VCS_CLEAN_FOREGROUND == '#101010' ]]
 [[ $POWERLEVEL9K_PROMPT_CHAR_ERROR_VIINS_FOREGROUND == '#aa4455' ]]
 # A local palette is loaded after tracked defaults and remains authoritative on reload.
 mkdir -p "$XDG_CONFIG_HOME/p10k"

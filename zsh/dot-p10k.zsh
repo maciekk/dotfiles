@@ -394,10 +394,12 @@
     fi
 
     # Styling for different parts of Git status.
-    local       meta='%7F' # white foreground
-    local      clean='%0F' # black foreground
-    local   modified='%0F' # black foreground
-    local  untracked='%0F' # black foreground
+    # Use the palette's hex ink, not ANSI 0/7: terminal themes remap those (Catppuccin Latte's
+    # "black" is light grey), which made Git text unreadable on the pastel backgrounds.
+    local       meta="%F{${POWERLEVEL9K_VCS_META_FOREGROUND:-0}}"
+    local      clean="%F{${POWERLEVEL9K_VCS_CLEAN_FOREGROUND:-0}}"
+    local   modified="%F{${POWERLEVEL9K_VCS_MODIFIED_FOREGROUND:-0}}"
+    local  untracked="%F{${POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND:-0}}"
     local conflicted='%1F' # red foreground
 
     local res
@@ -1867,6 +1869,7 @@
   typeset -g POWERLEVEL9K_VCS_MODIFIED_BACKGROUND=$p10k_yellow
   typeset -g POWERLEVEL9K_VCS_CONFLICTED_BACKGROUND=$p10k_yellow
   typeset -g POWERLEVEL9K_VCS_LOADING_BACKGROUND=$p10k_surface
+  typeset -g POWERLEVEL9K_VCS_{META,CLEAN,MODIFIED,UNTRACKED}_FOREGROUND=$p10k_ink
   typeset -g POWERLEVEL9K_STATUS_OK_FOREGROUND=$p10k_green
   typeset -g POWERLEVEL9K_STATUS_OK_PIPE_FOREGROUND=$p10k_green
   typeset -g POWERLEVEL9K_STATUS_ERROR_FOREGROUND=$p10k_yellow
