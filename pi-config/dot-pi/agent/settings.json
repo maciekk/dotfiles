@@ -9,7 +9,7 @@
     "showTerminalProgress": true
   },
   "tuiMode": "fullscreen",
-  "theme": "light/dark",
+  "theme": "omarchy-system",
   "defaultThinkingLevel": "medium",
   "lastChangelogVersion": "1.4.0"
 }
