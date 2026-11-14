@@ -2,6 +2,7 @@
   "defaultModel": "gpt-6.1-sol",
   "defaultProvider": "openai-codex",
   "hideThinkingBlock": true,
+  "collapseChangelog": true,
   "packages": [
     "npm:@narumitw/pi-usage"
   ],
@@ -11,5 +12,8 @@
   "tuiMode": "fullscreen",
   "theme": "omarchy-system",
   "defaultThinkingLevel": "medium",
-  "lastChangelogVersion": "1.4.0"
+  "lastChangelogVersion": "1.5.2",
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:@narumitw/pi-usage\",\"scope\":\"user\"}": "0.69.3"
+  }
 }

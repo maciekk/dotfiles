@@ -24,6 +24,10 @@ stow -D -t "$HOME" --dotfiles --ignore='^pi-usage\.json$' pi-config
   - stable, compact one-line token stats, context bar, Git counts, activity spinner, model, and thinking level
   - omits dollar costs for subscription usage
   - emphasizes remaining quota percentages from `pi-usage`; values above 30% stay neutral/dim, values above 15% and at or below 30% use warning colour without bold, and values at or below 15% use bold error colour
+- `.pi/agent/extensions/update-help.ts`
+  - Omarchy-only startup reminder and `/update-help` command: update Pi with `mise upgrade pi`, and packages with `pi update --extensions`
+  - restart Pi after updating; do not install a second Pi via npm or the pi.dev installer
+  - Pi has no extension hook for update-available notices, so the reminder appears on startup and `/reload`, even when no update is available
 - `.pi/agent/settings.json`
   - enables `@narumitw/pi-usage`
   - uses fullscreen TUI mode so the mouse wheel always scrolls the transcript
