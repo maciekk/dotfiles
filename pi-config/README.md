@@ -25,9 +25,10 @@ stow -D -t "$HOME" --dotfiles --ignore='^pi-usage\.json$' pi-config
   - omits dollar costs for subscription usage
   - emphasizes remaining quota percentages from `pi-usage`; values above 30% stay neutral/dim, values above 15% and at or below 30% use warning colour without bold, and values at or below 15% use bold error colour
 - `.pi/agent/extensions/update-help.ts`
-  - Omarchy-only startup reminder and `/update-help` command: update Pi with `mise upgrade pi`, and packages with `pi update --extensions`
+  - Omarchy-only update reminders: update Pi with `mise upgrade pi`, and packages with `pi update --extensions`; `/update-help` recalls both commands anytime
+  - checks in the background on startup and `/reload`; only shows a command when the corresponding update is confirmed (silent when current, offline, or checks fail)
+  - uses `mise outdated pi --json` for Pi (respecting mise's release-age policy) and Pi's own package checker for extensions; these checks are additional to Pi's built-in notices
   - restart Pi after updating; do not install a second Pi via npm or the pi.dev installer
-  - Pi has no extension hook for update-available notices, so the reminder appears on startup and `/reload`, even when no update is available
 - `.pi/agent/settings.json`
   - enables `@narumitw/pi-usage`
   - uses fullscreen TUI mode so the mouse wheel always scrolls the transcript
